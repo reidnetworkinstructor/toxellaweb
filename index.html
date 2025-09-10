@@ -45,6 +45,17 @@
     .ring .num{font-weight:700;font-size:1.2rem;fill:#eaf0ff}
     /* Code block */
     code.block{display:block;background:#0a1226;border:1px solid var(--border);padding:12px;border-radius:10px;overflow:auto}
+
+    /* === Tactic spectrum === */
+    .spectrum { margin-top:8px; }
+    .srow { display:flex; align-items:center; gap:10px; margin:8px 0; }
+    .srow .lbl { width:160px; min-width:140px; font-weight:600; }
+    @media (max-width:760px){ .srow .lbl{ width:120px; } }
+    .meter { position:relative; flex:1; height:12px; background:#0a1226; border:1px solid var(--border); border-radius:999px; overflow:hidden; }
+    .meter .fill { position:absolute; left:0; top:0; bottom:0; background:#7fb3ff; }
+    .meter .caret { position:absolute; top:-4px; width:2px; height:20px; background:#eaf0ff; box-shadow:0 0 0 2px rgba(234,240,255,.15); }
+    .scale { display:flex; justify-content:space-between; font-size:.75rem; color:var(--muted); margin-top:4px; }
+    .block { margin:12px 0; }
   </style>
 </head>
 <body>
@@ -160,7 +171,7 @@
       <!-- Detailed tab -->
       <div class="det-view hidden">
         <div class="row" style="gap:8px;margin-bottom:8px">
-          <button class="btn-copy">Copy narrative</button>
+          <button class="btn-copy">Copy report</button>
           <button class="btn-dl">Download .txt</button>
         </div>
         <div class="narrative"></div>
@@ -203,8 +214,6 @@
     // ===== Helpers =====
     const setStatus = (t)=> $status.textContent = t;
     const setProg = (t)=> $progress.textContent = t;
-    const byId = (id)=> document.getElementById(id);
-    function genJobId(){ return (crypto.randomUUID ? crypto.randomUUID() : 'job-'+Math.random().toString(36).slice(2)); }
     function ensureFiles(){
       if (files.length < 2) throw new Error("Please add at least 2 screenshots.");
       if (files.length > MAX_FILES) throw new Error(`Up to ${MAX_FILES} images on the free plan.`);
@@ -212,8 +221,7 @@
     function riskRingSVG(score){
       const pct = Math.max(0, Math.min(100, Math.round(score||0)));
       const r=45, c=2*Math.PI*r, dash = (pct/100)*c;
-      let color = '#27c07d';
-      if (pct>=67) color='#ff5f5f'; else if (pct>=34) color='#ffb020';
+      let color = '#27c07d'; if (pct>=67) color='#ff5f5f'; else if (pct>=34) color='#ffb020';
       return `
         <svg class="ring" viewBox="0 0 110 110" role="img" aria-label="Risk ${pct}/100">
           <circle cx="55" cy="55" r="${r}" stroke="#1a2746" stroke-width="12" fill="none"/>
@@ -233,66 +241,178 @@
       md = `<p>${md}</p>`.replace(/(<p>\s*)<li>/g,'<ul><li>').replace(/<\/li>\s*<\/p>/g,'</li></ul>');
       return md;
     }
-    function narrativeFromStruct(rep){
+
+    // ===== Premium narrative helpers =====
+    const TACTIC_ORDER = [
+      "gaslighting","darvo","blame-shifting","minimization","stonewalling","contempt",
+      "guilt-tripping","threats","coercion","triangulation","boundaries","projection"
+    ];
+    const TACTIC_NAME = {
+      "gaslighting":"Gaslighting",
+      "darvo":"DARVO (Deny, Attack, Reverse Victim/Offender)",
+      "blame-shifting":"Blame-shifting",
+      "minimization":"Minimization",
+      "stonewalling":"Stonewalling",
+      "contempt":"Contempt / Insults",
+      "guilt-tripping":"Guilt-tripping",
+      "threats":"Threats",
+      "coercion":"Coercion / Control",
+      "triangulation":"Triangulation",
+      "boundaries":"Boundary Misuse",
+      "projection":"Projection"
+    };
+    const TACTIC_DESC = {
+      "gaslighting":"Denies or distorts reality to make you doubt your memory, perception, or sanity.",
+      "darvo":"Flips roles: denies harm, attacks the accuser, and claims to be the real victim.",
+      "blame-shifting":"Redirects responsibility for their behavior back onto you or others.",
+      "minimization":"Downplays the seriousness of events or your feelings to avoid accountability.",
+      "stonewalling":"Refuses to engage, delays, or shuts down discussion to block resolution.",
+      "contempt":"Mocks, belittles, or insults you; communicates superiority or disgust.",
+      "guilt-tripping":"Leverages guilt to coerce compliance or apology when you did not do wrong.",
+      "threats":"Explicit or implied threats to punish, harm, or abandon if you don’t comply.",
+      "coercion":"Controls choices through pressure, ultimatums, or consequences.",
+      "triangulation":"Pulls in third parties to intimidate, discredit, or create alliances.",
+      "boundaries":"Invokes ‘boundaries’ selectively to dodge accountability or control access.",
+      "projection":"Accuses you of the very behavior they are doing to avoid owning it."
+    };
+    function scoreSynthesize(t){
+      const p = Math.max(0, Math.min(1, t.likelihood ?? 0));
+      const s = Math.max(1, Math.min(5, t.severity ?? 3));
+      const f = Math.max(0, Math.min(5, t.frequency ?? (t.examples?.length||0)));
+      return Math.round(40*p + 35*((s-1)/4) + 25*Math.min(1,f/5));
+    }
+    function scoreFor(tactics, id){
+      const t = (tactics||[]).find(x => (String(x.id||x.name||'').toLowerCase()) === id);
+      if (!t) return 0;
+      if (typeof t.score === 'number') return Math.max(0, Math.min(100, Math.round(t.score)));
+      return scoreSynthesize(t);
+    }
+    function examplesFor(rep, id, limit=6){
+      const receipts = (rep.receipts || rep.receipts?.highlights || []);
+      const grouped = {};
+      for (const r of receipts){
+        const cat = String(r.category || r.tactic || '').toLowerCase();
+        const q = (r.quote || r || '').toString().trim();
+        if (!q) continue;
+        (grouped[cat] ||= []).push(q);
+      }
+      let arr = grouped[id] || [];
+      if (!arr.length){
+        const t = (rep.tactics||[]).find(x => (String(x.id||x.name||'').toLowerCase()) === id);
+        arr = (t && t.examples) ? t.examples : [];
+      }
+      const seen = new Set(), out=[];
+      for (const q of arr){
+        const qq = q.slice(0,280);
+        if (!seen.has(qq)){ out.push(qq); seen.add(qq); }
+        if (out.length >= limit) break;
+      }
+      return out;
+    }
+    function spectrumRowHTML(label, score){
+      const pct = Math.max(0, Math.min(100, Math.round(score)));
+      return `
+        <div class="srow">
+          <div class="lbl">${label}</div>
+          <div class="meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}">
+            <div class="fill" style="width:${pct}%"></div>
+            <div class="caret" style="left: calc(${pct}% - 1px)"></div>
+          </div>
+        </div>`;
+    }
+    function buildPremiumReport(rep){
       const score = Math.round(rep.risk_score ?? 0);
       const label = (rep.risk_label || (score<34?'low':score<=66?'medium':'high')).toUpperCase();
-      const conf = Math.round(((rep.confidence ?? 0.85)*100));
-      const cb = rep.kpis?.communication_balance;
-      const es = rep.kpis?.emotional_stability;
-      const tactics = (rep.tactics||[]).sort((a,b)=> (b.score||0)-(a.score||0)).slice(0,6);
-      const receipts = rep.receipts || [];
+      const confPct = Math.round((rep.confidence ?? 0.85) * 100);
+      const cb = typeof rep.kpis?.communication_balance === 'number' ? Math.round(rep.kpis.communication_balance) : null;
+      const es = typeof rep.kpis?.emotional_stability   === 'number' ? Math.round(rep.kpis.emotional_stability)   : null;
 
-      const lines = [];
-      lines.push(`📑 **Toxella Manipulation Report**`);
-      lines.push(``);
-      lines.push(`🔢 **Scores**`);
-      lines.push(`- Manipulation Risk: **${score} / 100 (${label})**`);
-      if (typeof cb==='number') lines.push(`- Communication Balance: **${Math.round(cb)} / 100**`);
-      if (typeof es==='number') lines.push(`- Emotional Stability: **${Math.round(es)} / 100**`);
-      lines.push(`- Confidence: **${conf}%**`);
-      lines.push(``);
-      if (tactics.length){
-        lines.push(`🧩 **Tactic Breakdown**`);
-        tactics.forEach((t,i)=>{
-          const p = t.likelihood!=null ? ` (p≈${Number(t.likelihood).toFixed(2)})` : '';
-          const contrib = t.contribution_pct!=null ? ` • Contribution: ${t.contribution_pct.toFixed ? t.contribution_pct.toFixed(1) : t.contribution_pct}%` : '';
-          lines.push(`${i+1}. **${t.name || t.id}**${p}${contrib}`);
-          (t.examples||[]).slice(0,2).forEach(q => lines.push(`   - “${q}”`));
-        });
-        lines.push('');
+      // Scores header
+      let scoresHTML = `<div class="block"><h3 style="margin:6px 0">Scores</h3>
+        <ul>
+          <li>Manipulation Risk: <strong>${score} / 100 (${label})</strong></li>
+          ${cb !== null ? `<li>Communication Balance: <strong>${cb} / 100</strong></li>` : ''}
+          ${es !== null ? `<li>Emotional Stability: <strong>${es} / 100</strong></li>` : ''}
+          <li>Confidence: <strong>${confPct}%</strong></li>
+        </ul></div>`;
+
+      // Spectrum (all 12)
+      let spectrumHTML = '<div class="block"><h3 style="margin:6px 0">Tactic spectrum</h3><div class="spectrum">';
+      const tacticScores = [];
+      for (const id of TACTIC_ORDER){
+        const s = scoreFor(rep.tactics, id);
+        tacticScores.push({ id, score: s });
+        spectrumHTML += spectrumRowHTML(TACTIC_NAME[id], s);
       }
-      if (receipts.length){
-        lines.push(`📌 **Receipts (Flagged Quotes)**`);
-        receipts.slice(0,8).forEach(r=>{
-          const cat = (r.category || 'evidence');
-          const q = r.quote || (typeof r === 'string' ? r : JSON.stringify(r));
-          lines.push(`- ${cat}: “${q}”`);
-        });
-        lines.push('');
+      spectrumHTML += `</div><div class="scale"><span>None</span><span>Low</span><span>Medium</span><span>High</span><span>Severe</span></div></div>`;
+
+      // Top tactics
+      const top = tacticScores.slice().sort((a,b)=>b.score-a.score).slice(0,3).filter(t=>t.score>0);
+      let topHTML = '<div class="block"><h3 style="margin:6px 0">Top tactics (what it looks like)</h3>';
+      if (top.length === 0){
+        topHTML += '<p class="small">No strong manipulation indicators were detected. Some language may still be unhelpful or tense.</p>';
+      } else {
+        for (const t of top){
+          const id = t.id, name = TACTIC_NAME[id];
+          const ex = examplesFor(rep, id, 3);
+          topHTML += `<div class="block">
+            <div class="row" style="align-items:center">
+              <strong>${name}</strong>
+              <span class="pill">${t.score}/100</span>
+            </div>
+            <div class="small" style="margin:6px 0">${TACTIC_DESC[id]}</div>
+            ${ex.length ? `<ul>${ex.map(q=>`<li>“${q}”</li>`).join('')}</ul>` : '<div class="small">Signals present, no quotable snippets extracted.</div>'}
+          </div>`;
+        }
       }
-      lines.push(`📊 **Summary**`);
-      lines.push(`This conversation shows ${label==='HIGH'?'severe':label==='MEDIUM'?'elevated':'low'} manipulation risk based on detected tactics and evidence. Consider saving receipts and setting clear boundaries.`);
-      lines.push('');
-      lines.push(`✅ **Suggested Responses (Non-Escalating)**`);
-      lines.push(`- “Calling me names doesn’t address the question. Can you answer directly?”`);
-      lines.push(`- “I’m looking for an honest response, not deflection. Let’s focus on the specific issue.”`);
-      lines.push(`- “If you can’t engage respectfully right now, we can pause and revisit later.”`);
-      lines.push('');
-      lines.push(`🚦 **Risk Level:** ${label}`);
-      return lines.join('\n');
-    }
-    function chatToPlain(htmlElem){
-      return htmlElem.innerText.replace(/\n{3,}/g,'\n\n').trim();
+      topHTML += '</div>';
+
+      // Executive summary
+      const execHTML = `<div class="block">
+        <h3 style="margin:6px 0">Summary</h3>
+        <p>This conversation shows ${label==='HIGH'?'severe':label==='MEDIUM'?'elevated':'low'} manipulation risk. The most salient patterns are
+          ${top.length ? top.map(t=>TACTIC_NAME[t.id]).join(', ') : 'no strong tactics'}.
+          Use the receipts below as evidence and consider calm boundary-setting responses.</p>
+      </div>`;
+
+      // Receipts grouped
+      let receiptsHTML = '<div class="block"><h3 style="margin:6px 0">Receipts (flagged quotes, grouped)</h3>';
+      const byTactic = {};
+      for (const id of TACTIC_ORDER){
+        const ex = examplesFor(rep, id, 20);
+        if (ex.length){ byTactic[id] = ex; }
+      }
+      if (Object.keys(byTactic).length === 0){
+        receiptsHTML += '<p class="small">No quotable receipts were extracted from the screenshots.</p>';
+      } else {
+        for (const id of TACTIC_ORDER){
+          const arr = byTactic[id]; if (!arr) continue;
+          receiptsHTML += `<h4 style="margin:10px 0 4px">${TACTIC_NAME[id]}</h4><ul>${arr.map(q=>`<li>“${q}”</li>`).join('')}</ul>`;
+        }
+      }
+      receiptsHTML += '</div>';
+
+      // Tips
+      const tipsHTML = `<div class="block">
+        <h3 style="margin:6px 0">Suggested responses (non-escalating)</h3>
+        <ul>
+          <li>“Calling me names doesn’t address the question. Can you answer directly?”</li>
+          <li>“I’m asking about <em>this specific event</em>. Let’s stay with that.”</li>
+          <li>“If we can’t talk respectfully right now, let’s pause and revisit later.”</li>
+        </ul>
+      </div>`;
+
+      return scoresHTML + spectrumHTML + topHTML + execHTML + receiptsHTML + tipsHTML;
     }
 
     // ===== Dropzone =====
-    $api.textContent = API_BASE;
+    document.getElementById('apiBaseLabel').textContent = API_BASE;
     const handleFiles = (list)=>{
       files = Array.from(list||[]).slice(0, MAX_FILES);
       setStatus(`${files.length} file(s) selected.`);
-      if ($advanced.open) renderCLI(); // keep CLI in sync
+      if ($advanced.open) renderCLI();
     };
-    $chooseBtn.onclick = ()=> $fileInput.click();
+    document.getElementById('chooseBtn').onclick = ()=> $fileInput.click();
     $fileInput.onchange = (e)=> handleFiles(e.target.files);
     ['dragenter','dragover'].forEach(ev => $dz.addEventListener(ev, (e)=>{ e.preventDefault(); e.stopPropagation(); $dz.classList.add('drag'); }));
     ;['dragleave','drop'].forEach(ev => $dz.addEventListener(ev, (e)=>{ e.preventDefault(); e.stopPropagation(); $dz.classList.remove('drag'); }));
@@ -312,7 +432,7 @@ JOB_ID="$(uuidgen 2>/dev/null || python3 -c 'import uuid;print(uuid.uuid4())')"
 echo "JOB_ID=${D}JOB_ID"
 
 i=0; for f in ${names}; do
-  gsutil cp "${D}f" "gs://${D}BUCKET/uploads/${D}JOB_ID/${D}i.jpg"; i=$((i+1));
+  gsutil cp "\${f}" "gs://${D}BUCKET/uploads/${D}JOB_ID/${D}i.jpg"; i=$((i+1));
 done
 
 curl -sS -X POST "${D}API/jobs" -H "Content-Type: application/json" -d '{
@@ -387,9 +507,7 @@ while(${D}true){ curl "${D}Api/jobs/${D}JOB_ID"; Start-Sleep 3 }`;
         console.error(e);
         setProg('');
         setStatus((e && e.message) ? e.message : 'Something went wrong.');
-        if ($method.value==='signed') {
-          $advanced.open = true; renderCLI();
-        }
+        if ($method.value==='signed') { $advanced.open = true; renderCLI(); }
       }
     };
 
@@ -456,15 +574,15 @@ while(${D}true){ curl "${D}Api/jobs/${D}JOB_ID"; Start-Sleep 3 }`;
               $chips.appendChild(elc);
             }
 
-            // Receipts
+            // Receipts preview
             const recs = rep.receipts || rep.receipts?.highlights || [];
             $rec.innerHTML = recs.slice(0,10).map(r=>`<li>“${(r.quote || r).toString()}” <span class="small mono">· ${r.category||'evidence'}</span></li>`).join('');
 
-            // Narrative
-            const md = (rep.narrative_md && rep.narrative_md.trim()) ? rep.narrative_md : (function(){ try{return narrativeFromStruct(rep);}catch{return ''} })();
-            $narr.innerHTML = mdLite(md);
+            // Detailed: premium report (uses receipts + tactics to build grouped narrative)
+            $narr.innerHTML = buildPremiumReport(rep);
 
-            $copy.onclick = async ()=>{ try{ await navigator.clipboard.writeText($narr.innerText); setStatus('Narrative copied'); }catch{ setStatus('Copy failed'); } };
+            // Copy/Download
+            $copy.onclick = async ()=>{ try{ await navigator.clipboard.writeText($narr.innerText.replace(/\n{3,}/g,'\n\n').trim()); setStatus('Report copied'); }catch{ setStatus('Copy failed'); } };
             $dl.onclick = ()=>{ const blob = new Blob([$narr.innerText], {type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`toxella_report_${id}.txt`; a.click(); URL.revokeObjectURL(a.href); };
 
             setProg(''); setStatus('Analysis complete.');
