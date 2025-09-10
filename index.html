@@ -4,18 +4,18 @@
   <meta charset="utf-8" />
   <title>Toxella — Soft Launch MVP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Toxella MVP: upload 2–3 images, create a job, and view the structured risk report." />
+  <meta name="description" content="Toxella MVP: upload 2–3 images, create a job, and view the structured + narrative risk report." />
   <style>
     :root { --bg:#0b1220; --card:#121a2b; --text:#ebf0ff; --muted:#a4b1d1; --accent:#8ad1ff; --good:#27c07d; --warn:#ffb020; --bad:#ff5f5f; --border:#233055; }
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family: system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;}
     a{color:var(--accent);text-decoration:none;}
-    a:focus,button:focus,input:focus{outline:2px dashed var(--accent);outline-offset:2px;}
-    .wrap{max-width:880px;margin:0 auto;padding:24px;}
+    a:focus,button:focus,input:focus,select:focus,textarea:focus{outline:2px dashed var(--accent);outline-offset:2px;}
+    .wrap{max-width:980px;margin:0 auto;padding:24px;}
     .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin:16px 0;}
     .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
     label{font-weight:600;}
     input[type="file"]{border:1px solid var(--border);background:#0f172a;padding:10px;border-radius:8px;width:100%;}
-    select,input[type="text"]{border:1px solid var(--border);background:#0f172a;color:var(--text);padding:10px;border-radius:8px;}
+    select,input[type="text"],textarea{border:1px solid var(--border);background:#0f172a;color:var(--text);padding:10px;border-radius:8px;width:100%;}
     button{background:#1c2742;border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:10px;cursor:pointer;}
     button.primary{background:#22406a;}
     button[disabled]{opacity:.55;cursor:not-allowed;}
@@ -24,11 +24,25 @@
     .pill{font-size:.9rem;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:#0e1630;}
     .good{color:var(--good);} .warn{color:var(--warn);} .bad{color:var(--bad);}
     .grid{display:grid;gap:10px;} .grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr));}
-    @media (max-width:640px){.grid.cols-2{grid-template-columns:1fr;}}
+    @media (max-width:720px){.grid.cols-2{grid-template-columns:1fr;}}
     .divider{height:1px;background:var(--border);margin:14px 0;}
     .small{font-size:.9rem;color:var(--muted);} .right{text-align:right;margin-left:auto;}
     code.block{display:block;background:#0a1226;border:1px solid var(--border);padding:12px;border-radius:10px;overflow:auto;}
     .tag{padding:4px 8px;border-radius:8px;border:1px solid var(--border);}
+    /* --- One-way chat styles --- */
+    .chat { display:flex; flex-direction:column; gap:10px; margin-top:8px; }
+    .msg { max-width: 92%; padding:12px 14px; border-radius:14px; line-height:1.55; }
+    .msg.assistant { background:#0e1630; border:1px solid var(--border); color:var(--text); align-self:flex-start; }
+    .msg .small { color: var(--muted); font-size:.9rem; }
+    .typing { display:inline-block; width:26px; height:10px; position:relative; }
+    .typing::before, .typing::after, .typing span {
+      content:""; position:absolute; width:6px; height:6px; border-radius:50%; background:#8aa1d4; top:2px; animation: b 1.4s infinite;
+    }
+    .typing span { left:10px; animation-delay:.15s }
+    .typing::after { left:20px; animation-delay:.3s }
+    @keyframes b { 0%, 80%, 100% { transform:scale(0.6); opacity:.5 } 40% { transform:scale(1); opacity:1 } }
+    .chat-actions { margin-top:8px; display:flex; gap:6px; }
+    .btn-sm { padding:6px 10px; border-radius:8px; font-size:.9rem; background:#20345a; border:1px solid var(--border); color:var(--text); cursor:pointer; }
   </style>
 </head>
 <body>
@@ -69,13 +83,20 @@
             <div id="files-help" class="small">We won't upload in Manual mode; we'll generate CLI commands for you.</div>
           </div>
 
-          <div class="row">
+          <details class="card" style="margin-top:6px;">
+            <summary><strong>Advanced (optional)</strong> — tweak analysis</summary>
+            <textarea id="instructions" rows="6" placeholder="Add custom guidance to the analysis (optional). Leave empty for Toxella’s default 12-tactic narrative." ></textarea>
+            <div class="small">Examples: “Focus on gaslighting vs DARVO”, “Assume the contact is ‘Dad’.”</div>
+          </details>
+
+          <div class="row" style="margin-top:6px;">
             <button id="btnStart" class="primary">Create Report</button>
             <button id="btnReset" type="button">Reset</button>
             <span class="small">By continuing you agree to our <a href="#">Terms</a> & <a href="#">Privacy</a>.</span>
           </div>
         </div>
 
+        <!-- Manual CLI block -->
         <div id="manualBlock" class="card" style="display:none; margin-top:16px;">
           <h3 style="margin-top:0;">Manual (CLI) steps</h3>
           <p class="note">Run these in your terminal. They upload, create the job, and start polling.</p>
@@ -86,6 +107,7 @@
           </div>
         </div>
 
+        <!-- Signed URL flow block -->
         <div id="signedBlock" class="card" style="display:none; margin-top:16px;">
           <h3 style="margin-top:0;">Signed URL upload</h3>
           <p class="note">This calls <code>POST /signed-urls</code>, PUTs files to GCS, then creates a job.</p>
@@ -114,6 +136,7 @@
     </main>
   </div>
 
+  <!-- Job card template with one-way assistant chat -->
   <template id="jobTpl">
     <div class="card">
       <div class="row">
@@ -122,11 +145,9 @@
         <button class="right btn-delete" title="DELETE /jobs/{id}">Delete</button>
       </div>
       <div class="small">Created: <span class="job-created"></span></div>
-      <details style="margin-top:8px;">
-        <summary>Raw JSON</summary>
-        <pre class="mono job-json" style="white-space:pre-wrap;"></pre>
-      </details>
+
       <div class="divider"></div>
+
       <div class="grid cols-2">
         <div>
           <h4 style="margin:4px 0;">Risk</h4>
@@ -137,6 +158,20 @@
           <div class="mono job-brief">—</div>
         </div>
       </div>
+
+      <div class="divider"></div>
+
+      <h4 style="margin:4px 0;">Assistant</h4>
+      <div class="chat" data-chat aria-live="polite"></div>
+      <div class="chat-actions">
+        <button class="btn-sm" data-copy-chat>Copy narrative</button>
+        <button class="btn-sm" data-download-chat>Download .txt</button>
+      </div>
+
+      <details style="margin-top:10px;">
+        <summary>Raw JSON</summary>
+        <pre class="mono job-json" style="white-space:pre-wrap;"></pre>
+      </details>
     </div>
   </template>
 
@@ -188,6 +223,100 @@
       $signedBlock.style.display = $method.value === "signed" ? "block" : "none";
     }
 
+    // --- ultra-light markdown-to-HTML for narrative ---
+    function renderMarkdownLite(md){
+      if (!md) return "";
+      const esc = s => s.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+      md = md.replace(/\r\n/g, '\n').trim();
+      md = md.replace(/^#{1,6}\s*(.+)$/gm, (_,t)=>`<h3>${esc(t)}</h3>`);
+      md = md.replace(/\*\*(.+?)\*\*/g, (_,t)=>`<strong>${esc(t)}</strong>`);
+      md = md.replace(/^\s*[-•]\s+(.+)$/gm, (_,t)=>`<li>${esc(t)}</li>`);
+      md = md.replace(/(\n{2,})/g, '</p><p>');
+      md = `<p>${md}</p>`.replace(/(<p>\s*)<li>/g,'<ul><li>').replace(/<\/li>\s*<\/p>/g,'</li></ul>');
+      return md;
+    }
+    // Build a narrative from structured fields if narrative_md is missing
+    function narrativeFromStruct(rep){
+      const score = Math.round(rep.risk_score ?? 0);
+      const label = (rep.risk_label || (score<34?'low':score<=66?'medium':'high')).toUpperCase();
+      const conf = Math.round(((rep.confidence ?? 0.85)*100));
+      const cb = rep.kpis?.communication_balance;
+      const es = rep.kpis?.emotional_stability;
+      const tactics = (rep.tactics||[]).sort((a,b)=> (b.score||0)-(a.score||0)).slice(0,6);
+      const receipts = rep.receipts || [];
+
+      const lines = [];
+      lines.push(`📑 **Toxella Manipulation Report**`);
+      lines.push(``);
+      lines.push(`🔢 **Scores**`);
+      lines.push(`- Manipulation Risk: **${score} / 100 (${label})**`);
+      if (typeof cb === 'number') lines.push(`- Communication Balance: **${Math.round(cb)} / 100**`);
+      if (typeof es === 'number') lines.push(`- Emotional Stability: **${Math.round(es)} / 100**`);
+      lines.push(`- Confidence: **${conf}%**`);
+      lines.push(``);
+      if (tactics.length){
+        lines.push(`🧩 **Tactic Breakdown**`);
+        tactics.forEach((t,i)=>{
+          const p = t.likelihood!=null ? ` (p≈${Number(t.likelihood).toFixed(2)})` : '';
+          const contrib = t.contribution_pct!=null ? ` • Contribution: ${t.contribution_pct.toFixed ? t.contribution_pct.toFixed(1) : t.contribution_pct}%` : '';
+          lines.push(`${i+1}. **${t.name}**${p}${contrib}`);
+          (t.examples||[]).slice(0,2).forEach(q => lines.push(`   - “${q}”`));
+        });
+        lines.push(``);
+      }
+      if (receipts.length){
+        lines.push(`📌 **Receipts (Flagged Quotes)**`);
+        receipts.slice(0,8).forEach(r=>{
+          const cat = (r.category || 'evidence');
+          const q = r.quote || (typeof r === 'string' ? r : JSON.stringify(r));
+          lines.push(`- ${cat}: “${q}”`);
+        });
+        lines.push(``);
+      }
+      lines.push(`📊 **Summary**`);
+      lines.push(`This conversation shows ${label==='HIGH'?'severe':label==='MEDIUM'?'elevated':'low'} manipulation risk based on the detected tactics and evidence. Consider saving receipts and setting clear boundaries.`);
+      lines.push(``);
+      lines.push(`✅ **Suggested Responses (Non-Escalating)**`);
+      lines.push(`- “Calling me names doesn’t address the question. Can you answer directly?”`);
+      lines.push(`- “I’m looking for an honest response, not deflection. Let’s focus on the specific issue.”`);
+      lines.push(`- “If you can’t engage respectfully right now, we can pause and revisit later.”`);
+      lines.push(``);
+      lines.push(`🚦 **Risk Level:** ${label}`);
+      return lines.join('\n');
+    }
+    // Chat helpers
+    function postAssistantMessage(container, html){
+      const msg = document.createElement('div');
+      msg.className = 'msg assistant';
+      msg.innerHTML = html;
+      container.appendChild(msg);
+      container.scrollTop = container.scrollHeight;
+    }
+    function showTyping(container){
+      const tip = document.createElement('div');
+      tip.className = 'msg assistant';
+      tip.innerHTML = `<span class="typing"><span></span></span>`;
+      container.appendChild(tip);
+      container.scrollTop = container.scrollHeight;
+      return () => { tip.remove(); };
+    }
+    async function runAssistantNarrative(container, rep){
+      let hideTyping = showTyping(container);
+      await new Promise(r=>setTimeout(r, 500));
+      hideTyping(); postAssistantMessage(container, `<strong>Analysis complete.</strong> I generated a summary for your screenshots.`);
+      const md = (rep.narrative_md && rep.narrative_md.trim()) ? rep.narrative_md : narrativeFromStruct(rep);
+      hideTyping = showTyping(container);
+      await new Promise(r=>setTimeout(r, 600));
+      hideTyping(); postAssistantMessage(container, renderMarkdownLite(md));
+      hideTyping = showTyping(container);
+      await new Promise(r=>setTimeout(r, 400));
+      hideTyping(); postAssistantMessage(container, `<div class="small">Tip: you can copy or download this narrative below. If anything looks off, try uploading clearer screenshots.</div>`);
+    }
+    function chatToPlain(container){
+      return Array.from(container.querySelectorAll('.msg.assistant'))
+        .map(m => m.innerText.trim()).join('\n\n');
+    }
+
     // ===== Job UI & Polling =====
     function addJobCard(id){
       const frag = jobTpl.content.cloneNode(true);
@@ -199,6 +328,9 @@
       const $risk = el.querySelector(".job-risk");
       const $brief = el.querySelector(".job-brief");
       const $btnDel = el.querySelector(".btn-delete");
+      const chatEl = el.querySelector("[data-chat]");
+      const copyBtn = el.querySelector("[data-copy-chat]");
+      const dlBtn   = el.querySelector("[data-download-chat]");
 
       $btnDel.addEventListener("click", async () => {
         try { await fetch(`${API_BASE}/jobs/${encodeURIComponent(id)}`, { method:"DELETE" }); } catch {}
@@ -215,44 +347,62 @@
           $json.textContent = JSON.stringify(j, null, 2);
           const st = (j.status || "").toLowerCase();
           $statusEl.textContent = st || "unknown";
-          $statusEl.className = "pill job-status " + (st.includes("done")||st.includes("succeed") ? "good" :
+          $statusEl.className = "pill job-status " + (st.includes("complete")||st.includes("done")||st.includes("succeed") ? "good" :
                                                      st.includes("fail")||st.includes("error") ? "bad" : "warn");
           if (j.reportId){
-            // fetch full report and render
-            const rr = await fetch(`${API_BASE}/reports/${encodeURIComponent(j.reportId)}`);
+            const rr = await fetch(`${API_BASE}/reports/${encodeURIComponent(j.reportId)}`, { cache:"no-store" });
             const rep = await rr.json();
             $json.textContent = JSON.stringify(rep, null, 2);
-            
-            // Extract data from the actual report structure
-            const score = rep.analysis?.risk_score ?? rep.risk_score ?? rep.score ?? null;
-            const riskBucket = rep.analysis?.risk_bucket ?? "";
-            const confidence = rep.analysis?.confidence ?? "";
+
+            // Risk summary
+            const score = rep.risk_score ?? rep.analysis?.risk_score ?? null;
+            const bucket = rep.risk_label ?? rep.analysis?.risk_bucket ?? "";
+            const confidence = rep.confidence ?? rep.analysis?.confidence ?? "";
             const tactics = rep.tactics || [];
-            const receipts = rep.receipts?.highlights || rep.receipts || [];
-            
-            // Display risk score with bucket and confidence
+            const receipts = rep.receipts || rep.receipts?.highlights || [];
+
             let riskText = "—";
             if (score != null) {
-              riskText = `${score}/100`;
-              if (riskBucket) riskText += ` (${riskBucket})`;
-              if (confidence) riskText += ` • ${Math.round(confidence * 100)}% confidence`;
+              riskText = `${Math.round(score)}/100`;
+              if (bucket) riskText += ` (${String(bucket).toUpperCase()})`;
+              if (confidence !== "" && confidence != null) {
+                const pct = Math.round((typeof confidence === 'number' ? confidence : Number(confidence)) * 100);
+                if (!Number.isNaN(pct)) riskText += ` • ${pct}% confidence`;
+              }
             }
             $risk.textContent = riskText;
-            
-            // Display tactics and receipts
+
             const parts = [];
             if (tactics.length) {
-              const tacticNames = tactics.map(t => t.name || t).join(", ");
-              parts.push(`tactics: ${tacticNames}`);
+              const top = tactics.slice(0,3).map(t => t.name || t.id || "").filter(Boolean);
+              if (top.length) parts.push(`tactics: ${top.join(", ")}`);
             }
-            if (receipts.length) {
+            if (receipts && receipts.length) {
               parts.push(`${receipts.length} evidence quotes`);
             }
             $brief.textContent = parts.length ? parts.join(" • ") : "—";
+
+            // Start one-way assistant chat with narrative
+            runAssistantNarrative(chatEl, rep);
+            copyBtn.onclick = async () => {
+              try { await navigator.clipboard.writeText(chatToPlain(chatEl)); setStatus("Copied narrative."); }
+              catch { setStatus("Copy failed."); }
+            };
+            dlBtn.onclick = () => {
+              const blob = new Blob([chatToPlain(chatEl)], { type: "text/plain" });
+              const a = document.createElement("a");
+              a.href = URL.createObjectURL(blob);
+              a.download = `toxella_narrative_${id}.txt`;
+              a.click();
+              URL.revokeObjectURL(a.href);
+            };
+
             return; // terminal
           }
           if (st.includes("fail") || st.includes("error")) return;
-        } catch {}
+        } catch (e) {
+          // swallow and retry
+        }
         setTimeout(poll, 3000);
       }
       poll();
@@ -260,10 +410,11 @@
       createdJobs.push({ id, el });
     }
 
-    // ===== Signed URL flow (matches your backend) =====
+    // ===== Signed URL flow =====
     async function runSignedFlow(files){
       $signedLogs.textContent = "";
       const log = (t) => $signedLogs.textContent += t + "\n";
+      const adv = (document.getElementById("instructions")?.value || "").trim();
 
       // 1) Get upload slots
       let jobId, urls;
@@ -297,9 +448,10 @@
 
       // 3) Create job
       try{
+        const body = { jobId, plan:"free", files: fileMeta, ...(adv ? { instructions: adv } : {}) };
         const cr = await fetch(`${API_BASE}/jobs`, {
           method:"POST", headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify({ jobId, plan:"free", files: fileMeta })
+          body: JSON.stringify(body)
         });
         const cj = await cr.json();
         if (!cr.ok) throw new Error(cj.error || "create job failed");
@@ -310,12 +462,12 @@
       }catch(e){ log(`❌ Create job failed: ${e.message || e}`); }
     }
 
-    // ===== Manual (CLI) generator — FIXED =====
+    // ===== Manual (CLI) generator =====
     function renderCli(files){
       const DOLLAR = '$';
       const fileList = files.map(f => `"${f.name}"`).join(" ");
       const fileJsons = files.map((f, i) => `{"path":"uploads/${DOLLAR}JOB_ID/${i}.jpg"}`).join(',');
-      
+
       const bash = `# ==== macOS/Linux (bash) ====
 API="${API_BASE}"
 BUCKET="${BUCKET}"
@@ -400,7 +552,6 @@ while (${DOLLAR}true) { curl "${DOLLAR}Api/jobs/${DOLLAR}JOB_ID"; Start-Sleep -S
         catch{ setStatus("Could not copy. Select the block and copy manually."); }
       });
 
-      // Manual flow helper: start polling an existing job id
       $btnConfirmUploaded.addEventListener("click", () => {
         const jobId = prompt("Paste the JOB_ID printed by the CLI (or the id in the POST /jobs response):");
         if (jobId) addJobCard(jobId);
@@ -414,26 +565,8 @@ while (${DOLLAR}true) { curl "${DOLLAR}Api/jobs/${DOLLAR}JOB_ID"; Start-Sleep -S
         setStatus("Requested deletion for all jobs (best-effort).");
       });
 
-      // Add debugging - test API connection on load
-      console.log("Testing API connection...");
-      fetch(`${API_BASE}/signed-urls`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: 'free', count: 2 })
-      })
-      .then(response => {
-        console.log("API response status:", response.status);
-        return response.json();
-      })
-      .then(data => {
-        console.log("API test successful:", data);
-        setStatus("API connected successfully!");
-      })
-      .catch(error => {
-        console.error("API test failed:", error);
-        setStatus(`API connection failed: ${error.message}`);
-      });
-
+      // Optional connectivity poke (won't block UI)
+      fetch(`${API_BASE}/healthz`).then(r=>r.ok?r.json():null).then(_=>{}).catch(_=>{});
     })();
   </script>
 </body>
