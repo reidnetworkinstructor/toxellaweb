@@ -2,198 +2,778 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Toxella — Soft Launch MVP</title>
+  <title>Toxella — Communication Analysis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Upload 2–3 screenshots, add optional context, and generate a manipulation risk report with summary and a detailed narrative." />
+  <meta name="description" content="Analyze conversation screenshots for manipulation patterns with AI-powered insights." />
   <style>
-    :root { --bg:#0b1220; --card:#121a2b; --text:#ebf0ff; --muted:#a4b1d1; --accent:#8ad1ff; --good:#27c07d; --warn:#ffb020; --bad:#ff5f5f; --border:#233055; --chip:#0e1630; }
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;}
-    a{color:var(--accent);text-decoration:none}
-    a:focus,button:focus,input:focus,textarea:focus,select:focus{outline:2px dashed var(--accent);outline-offset:2px}
-    .wrap{max-width:980px;margin:0 auto;padding:24px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin:16px 0}
-    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-    .grid{display:grid;gap:12px}
-    .grid.cols-2{grid-template-columns:1fr 1fr}
-    @media (max-width:760px){.grid.cols-2{grid-template-columns:1fr}}
-    .pill{font-size:.9rem;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:#0e1630}
-    .small{font-size:.92rem;color:var(--muted)}
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
-    .divider{height:1px;background:var(--border);margin:14px 0}
-    label{font-weight:600}
-    input[type="file"],textarea,select{border:1px solid var(--border);background:#0f172a;color:var(--text);padding:10px;border-radius:10px}
-    textarea{width:100%;min-height:110px;resize:vertical}
-    button{background:#1b2948;border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:10px;cursor:pointer}
-    button.primary{background:#22406a}
-    button[disabled]{opacity:.55;cursor:not-allowed}
-    .right{margin-left:auto}
-    /* Dropzone */
-    .dz{border:2px dashed var(--border);border-radius:12px;padding:18px;text-align:center;background:#0c1428}
-    .dz.drag{border-color:var(--accent);background:#0d1832}
-    .dz .hint{color:var(--muted);font-size:.95rem}
-    /* Tabs */
-    .tabs{display:flex;gap:8px;margin:8px 0}
-    .tab{padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:#0e1630;cursor:pointer}
-    .tab.active{background:#203860}
-    .hidden{display:none}
-    /* Chips */
-    .chip{display:inline-flex;gap:6px;align-items:center;background:var(--chip);border:1px solid var(--border);padding:6px 10px;border-radius:999px;margin:2px 6px 2px 0}
-    .bar{display:inline-block;height:6px;width:70px;background:#0a1226;border-radius:4px;overflow:hidden}
-    .bar > i{display:block;height:100%;background:#7fb3ff}
-    /* Risk ring */
-    .ring{width:110px;height:110px}
-    .ring .num{font-weight:700;font-size:1.2rem;fill:#eaf0ff}
-    /* Code block */
-    code.block{display:block;background:#0a1226;border:1px solid var(--border);padding:12px;border-radius:10px;overflow:auto}
+    /* Modern Design System */
+    :root {
+      --bg-primary: #fafbfc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f5f7fa;
+      --bg-accent: #f0f4ff;
+      
+      --text-primary: #1a1d29;
+      --text-secondary: #4a5568;
+      --text-muted: #718096;
+      --text-inverse: #ffffff;
+      
+      --border-light: #e2e8f0;
+      --border-medium: #cbd5e0;
+      --border-focus: #4299e1;
+      
+      --accent: #4299e1;
+      --accent-dark: #2b6cb0;
+      --success: #38a169;
+      --warning: #ed8936;
+      --danger: #e53e3e;
+      
+      --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+    }
 
-    /* === Tactic spectrum === */
-    .spectrum { margin-top:8px; }
-    .srow { display:flex; align-items:center; gap:10px; margin:8px 0; }
-    .srow .lbl { width:160px; min-width:140px; font-weight:600; }
-    @media (max-width:760px){ .srow .lbl{ width:120px; } }
-    .meter { position:relative; flex:1; height:12px; background:#0a1226; border:1px solid var(--border); border-radius:999px; overflow:hidden; }
-    .meter .fill { position:absolute; left:0; top:0; bottom:0; background:#7fb3ff; }
-    .meter .caret { position:absolute; top:-4px; width:2px; height:20px; background:#eaf0ff; box-shadow:0 0 0 2px rgba(234,240,255,.15); }
-    .scale { display:flex; justify-content:space-between; font-size:.75rem; color:var(--muted); margin-top:4px; }
-    .block { margin:12px 0; }
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Layout */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .section {
+      margin: 32px 0;
+    }
+
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 24px 24px 0;
+    }
+
+    .card-body {
+      padding: 24px;
+    }
+
+    .card-footer {
+      padding: 0 24px 24px;
+      border-top: 1px solid var(--border-light);
+      margin-top: 24px;
+      padding-top: 24px;
+    }
+
+    /* Typography */
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin: 0;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0 0 16px 0;
+      color: var(--text-primary);
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0 0 12px 0;
+      color: var(--text-primary);
+    }
+
+    .text-sm {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .text-xs {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-accent) 100%);
+      border-bottom: 1px solid var(--border-light);
+      padding: 32px 0;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    /* Upload Zone */
+    .upload-zone {
+      border: 2px dashed var(--border-medium);
+      border-radius: var(--radius-lg);
+      padding: 48px 24px;
+      text-align: center;
+      background: var(--bg-tertiary);
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.drag-over {
+      border-color: var(--accent);
+      background: var(--bg-accent);
+      transform: translateY(-2px);
+    }
+
+    .upload-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+    }
+
+    .upload-text {
+      font-size: 1.125rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .upload-hint {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .form-input,
+    .form-textarea,
+    .form-select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-md);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus,
+    .form-select:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .form-help {
+      margin-top: 6px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border: 1px solid transparent;
+      border-radius: var(--radius-md);
+      font-weight: 500;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--text-inverse);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-dark);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+      background: var(--bg-secondary);
+      border-color: var(--border-medium);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--bg-tertiary);
+      border-color: var(--border-focus);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: var(--text-inverse);
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: #c53030;
+    }
+
+    .btn-lg {
+      padding: 16px 32px;
+      font-size: 1.125rem;
+    }
+
+    .btn-sm {
+      padding: 8px 16px;
+      font-size: 0.875rem;
+    }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      gap: 24px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+      
+      .header-content {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+
+    /* Progress */
+    .progress {
+      margin: 16px 0;
+      padding: 16px;
+      background: var(--bg-accent);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+    }
+
+    .progress-steps {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .progress-step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+    }
+
+    .progress-step.active {
+      color: var(--accent);
+    }
+
+    .progress-step.complete {
+      color: var(--success);
+    }
+
+    /* Results */
+    .result-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      margin-bottom: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-light);
+      background: var(--bg-tertiary);
+    }
+
+    .result-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .result-status {
+      padding: 4px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-pending {
+      background: #fef5e7;
+      color: #744210;
+    }
+
+    .status-processing {
+      background: #e6fffa;
+      color: #065f46;
+    }
+
+    .status-complete {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* Risk Visualization */
+    .risk-display {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      margin: 24px 0;
+    }
+
+    .risk-circle {
+      position: relative;
+      width: 120px;
+      height: 120px;
+    }
+
+    .risk-value {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .risk-metrics {
+      flex: 1;
+    }
+
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .metric:last-child {
+      border-bottom: none;
+    }
+
+    .metric-label {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .metric-value {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-light);
+      margin-bottom: 24px;
+    }
+
+    .tab {
+      padding: 12px 24px;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab:hover {
+      color: var(--text-primary);
+    }
+
+    /* Hidden */
+    .hidden {
+      display: none !important;
+    }
+
+    /* File input */
+    .file-input {
+      display: none;
+    }
+
+    /* Utility Classes */
+    .flex {
+      display: flex;
+    }
+
+    .items-center {
+      align-items: center;
+    }
+
+    .justify-between {
+      justify-content: space-between;
+    }
+
+    .gap-4 {
+      gap: 16px;
+    }
+
+    .mt-4 {
+      margin-top: 16px;
+    }
+
+    .mb-4 {
+      margin-bottom: 16px;
+    }
+
+    .font-mono {
+      font-family: var(--font-mono);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 16px;
+      }
+      
+      .upload-zone {
+        padding: 32px 16px;
+      }
+      
+      .risk-display {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="card" role="banner">
-      <div class="row">
-        <h1 style="margin:0;">🧪 Toxella</h1>
-        <span class="pill">Free: 1 report • up to 3 images</span>
-        <span class="right small">API: <span id="apiBaseLabel" class="mono"></span></span>
-      </div>
-      <p id="status" class="small" aria-live="polite">Ready.</p>
-    </header>
-
-    <!-- 1) Upload & Context -->
-    <section class="card" aria-label="Upload and context">
-      <h2 style="margin:0 0 8px">Diagnose screenshots</h2>
-      <div id="dropzone" class="dz" tabindex="0" aria-label="Screenshot dropzone">
-        <div><strong>Drop 2–3 screenshots</strong> (JPG/PNG) or</div>
-        <div style="margin-top:8px">
-          <input id="fileInput" type="file" accept="image/*" multiple style="display:none" />
-          <button id="chooseBtn" class="primary">Choose files</button>
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="brand">
+          <div class="brand-icon">⚗️</div>
+          <div>
+            <h1>Toxella</h1>
+            <p class="text-sm" style="margin: 0;">Communication Analysis Platform</p>
+          </div>
         </div>
-        <div class="hint" style="margin-top:8px">We auto-delete images after analysis. Only the JSON report is stored.</div>
-      </div>
-
-      <div class="grid cols-2" style="margin-top:8px">
-        <div>
-          <label for="context">Extra context (optional)</label>
-          <textarea id="context" placeholder="Who’s speaking to you? What are you worried about? e.g., “Dad keeps denying something and flipping blame.”"></textarea>
-          <div class="small">We’ll pass this to analysis to sharpen the narrative. Keep it brief.</div>
-        </div>
-        <div>
-          <label for="method">Upload method</label>
-          <select id="method">
-            <option value="signed" selected>Signed URLs (automatic)</option>
-            <option value="manual">Manual (CLI fallback)</option>
-          </select>
-          <details id="advanced" style="margin-top:10px">
-            <summary><strong>Advanced</strong> — CLI fallback & settings</summary>
-            <div class="small" style="margin:10px 0">If browser uploads fail or CORS blocks you, use these commands.</div>
-            <code id="cliBlock" class="block mono" aria-label="CLI commands"></code>
-            <div class="row" style="margin-top:8px">
-              <button id="copyCli">Copy commands</button>
-              <button id="confirmCli" class="primary">I ran these — Start polling</button>
-            </div>
-          </details>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <!-- 2) Generate -->
-      <div class="row">
-        <button id="generateBtn" class="primary">Generate report</button>
-        <span id="progress" class="small" aria-live="polite"></span>
-      </div>
-    </section>
-
-    <!-- 3) Results -->
-    <section class="card" aria-label="Results">
-      <div class="row">
-        <h2 style="margin:0">Results</h2>
-        <button id="deleteAll" class="right" title="Delete all results from this page (best-effort)">Delete all</button>
-      </div>
-      <div id="results"></div>
-    </section>
-
-    <footer class="card small" aria-label="Footer">
-      <div>Privacy: Images auto-delete (bucket lifecycle). Only structured JSON is stored. You can request deletion anytime.</div>
-      <div style="margin-top:6px">
-        <a href="#" aria-label="Terms link">Terms</a> ·
-        <a href="#" aria-label="Privacy link">Privacy</a>
-      </div>
-    </footer>
-  </div>
-
-  <template id="resultTpl">
-    <div class="card">
-      <div class="row">
-        <div><strong>Job</strong> <span class="mono job-id"></span></div>
-        <span class="pill job-status">pending</span>
-        <button class="right btn-delete" title="Delete this job (best-effort)">Delete</button>
-      </div>
-      <div class="small">Created: <span class="job-created"></span></div>
-
-      <div class="divider"></div>
-
-      <!-- Tabs -->
-      <div class="tabs">
-        <button class="tab tab-sum active" type="button">Summary</button>
-        <button class="tab tab-det" type="button">Detailed report</button>
-      </div>
-
-      <!-- Summary tab -->
-      <div class="sum-view">
-        <div class="row" style="align-items:flex-start">
-          <div class="ring-wrap"></div>
-          <div style="flex:1;min-width:240px">
-            <div class="row">
-              <span class="chip"><strong>Confidence</strong> <span class="small conf-val"></span></span>
-              <span class="chip"><strong>Comm. balance</strong> <span class="small cb-val"></span></span>
-              <span class="chip"><strong>Emotional stability</strong> <span class="small es-val"></span></span>
-            </div>
-            <div style="margin-top:10px" class="tactic-chips"></div>
-            <details style="margin-top:10px">
-              <summary>View receipts (quotes)</summary>
-              <ul class="receipts-list"></ul>
-            </details>
+        <div class="status-bar">
+          <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span>System Ready</span>
+          </div>
+          <div class="status-indicator">
+            <span class="text-xs font-mono" id="apiBaseLabel"></span>
           </div>
         </div>
       </div>
+    </div>
+  </header>
 
-      <!-- Detailed tab -->
-      <div class="det-view hidden">
-        <div class="row" style="gap:8px;margin-bottom:8px">
-          <button class="btn-copy">Copy report</button>
-          <button class="btn-dl">Download .txt</button>
+  <main class="container">
+    <!-- Upload Section -->
+    <section class="section">
+      <div class="card">
+        <div class="card-header">
+          <h2>Analyze Conversation Screenshots</h2>
+          <p class="text-sm">Upload 2-3 screenshots of text conversations to identify potential manipulation patterns</p>
         </div>
-        <div class="narrative"></div>
+        
+        <div class="card-body">
+          <div class="upload-zone" id="dropzone" tabindex="0">
+            <div class="upload-icon">📱</div>
+            <div class="upload-text">Drop screenshots here or click to browse</div>
+            <div class="upload-hint">Supports JPG, PNG • Max 3 files • Images auto-deleted after analysis</div>
+            <input type="file" class="file-input" id="fileInput" accept="image/*" multiple>
+            <button class="btn btn-primary" id="chooseBtn">Choose Files</button>
+          </div>
+
+          <div id="progress" class="progress hidden">
+            <div><strong>Processing your analysis...</strong></div>
+            <div class="progress-steps">
+              <div class="progress-step" id="step-upload">
+                <span>📤</span> Upload
+              </div>
+              <div class="progress-step" id="step-analyze">
+                <span>🔍</span> Analyze
+              </div>
+              <div class="progress-step" id="step-report">
+                <span>📊</span> Generate Report
+              </div>
+            </div>
+            <div class="text-sm mt-4" id="progressText">Initializing...</div>
+          </div>
+
+          <div class="grid grid-2 mt-4">
+            <div class="form-group">
+              <label class="form-label" for="context">Additional Context (Optional)</label>
+              <textarea 
+                class="form-textarea" 
+                id="context" 
+                placeholder="Provide context about the relationship or situation that might help with analysis..."
+              ></textarea>
+              <div class="form-help">This helps our AI provide more accurate insights</div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="method">Upload Method</label>
+              <select class="form-select" id="method">
+                <option value="signed" selected>Automatic Upload (Recommended)</option>
+                <option value="manual">Manual CLI Upload</option>
+              </select>
+              <div class="form-help">Use manual mode if automatic upload fails</div>
+            </div>
+          </div>
+
+          <details id="advanced" class="mt-4">
+            <summary class="btn btn-secondary btn-sm">Show Advanced Options</summary>
+            <div class="mt-4">
+              <div class="text-sm mb-4">If automatic upload fails, use these CLI commands:</div>
+              <pre id="cliBlock" class="font-mono text-xs" style="background: var(--bg-tertiary); padding: 16px; border-radius: var(--radius-md); overflow-x: auto;"></pre>
+              <div class="flex gap-4 mt-4">
+                <button class="btn btn-secondary btn-sm" id="copyCli">Copy Commands</button>
+                <button class="btn btn-primary btn-sm" id="confirmCli">I Ran Commands - Start Polling</button>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="card-footer">
+          <div class="flex items-center justify-between">
+            <button class="btn btn-primary btn-lg" id="generateBtn">Generate Analysis Report</button>
+            <div class="text-sm">
+              Free plan: 1 report per session
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="section">
+      <div class="card">
+        <div class="card-header">
+          <div class="flex items-center justify-between">
+            <h2>Analysis Results</h2>
+            <button class="btn btn-danger btn-sm" id="deleteAll">Clear All Results</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="results">
+            <div class="text-sm" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
+              No analyses yet. Upload screenshots above to get started.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Result Template -->
+  <template id="resultTpl">
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-meta">
+          <div>
+            <div style="font-weight: 600;">Analysis Report</div>
+            <div class="text-xs font-mono job-id"></div>
+          </div>
+          <div class="result-status job-status">pending</div>
+        </div>
+        <button class="btn btn-secondary btn-sm btn-delete">Delete</button>
       </div>
 
-      <details style="margin-top:10px">
-        <summary>Raw JSON</summary>
-        <pre class="mono raw-json" style="white-space:pre-wrap"></pre>
-      </details>
+      <div class="card-body">
+        <div class="tabs">
+          <button class="tab tab-sum active">Summary</button>
+          <button class="tab tab-det">Detailed Report</button>
+          <button class="tab tab-raw">Raw Data</button>
+        </div>
+
+        <!-- Summary View -->
+        <div class="sum-view">
+          <div class="risk-display">
+            <div class="ring-wrap"></div>
+            <div class="risk-metrics">
+              <div class="metric">
+                <span class="metric-label">Analysis Confidence</span>
+                <span class="metric-value conf-val">—</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Communication Balance</span>
+                <span class="metric-value cb-val">—</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Emotional Stability</span>
+                <span class="metric-value es-val">—</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tactic-chips mt-4"></div>
+
+          <details class="mt-4">
+            <summary class="btn btn-secondary btn-sm">View Evidence Quotes</summary>
+            <ul class="receipts-list mt-4"></ul>
+          </details>
+        </div>
+
+        <!-- Detailed View -->
+        <div class="det-view hidden">
+          <div class="flex gap-4 mb-4">
+            <button class="btn btn-secondary btn-sm btn-copy">Copy Report</button>
+            <button class="btn btn-secondary btn-sm btn-dl">Download .txt</button>
+          </div>
+          <div class="narrative"></div>
+        </div>
+
+        <!-- Raw Data View -->
+        <div class="raw-view hidden">
+          <pre class="raw-json font-mono text-xs" style="background: var(--bg-tertiary); padding: 16px; border-radius: var(--radius-md); overflow-x: auto; white-space: pre-wrap;"></pre>
+        </div>
+      </div>
     </div>
   </template>
 
   <script>
-    // ===== Config =====
+    // Configuration
     const DEFAULT_API = "https://toxella-api-yhopcbvaia-uc.a.run.app";
     const API_BASE = new URLSearchParams(location.search).get("api") || DEFAULT_API;
     const BUCKET = "toxella-id-uploads";
     const FREE_MAX_JOBS = 1, MAX_FILES = 3;
 
-    // ===== Elements =====
-    const $status = document.getElementById('status');
-    const $progress = document.getElementById('progress');
+    // DOM Elements
+    const $status = document.querySelector('.status-indicator span');
     const $api = document.getElementById('apiBaseLabel');
     const $dz = document.getElementById('dropzone');
     const $fileInput = document.getElementById('fileInput');
@@ -205,406 +785,157 @@
     const $copyCli = document.getElementById('copyCli');
     const $confirmCli = document.getElementById('confirmCli');
     const $generate = document.getElementById('generateBtn');
+    const $progress = document.getElementById('progress');
+    const $progressText = document.getElementById('progressText');
     const $results = document.getElementById('results');
     const $deleteAll = document.getElementById('deleteAll');
     const resultTpl = document.getElementById('resultTpl');
 
     let jobs = [], jobsCount = 0, files = [];
 
-    // ===== Helpers =====
-    const setStatus = (t)=> $status.textContent = t;
-    const setProg = (t)=> $progress.textContent = t;
-    function ensureFiles(){
-      if (files.length < 2) throw new Error("Please add at least 2 screenshots.");
-      if (files.length > MAX_FILES) throw new Error(`Up to ${MAX_FILES} images on the free plan.`);
-    }
-    function riskRingSVG(score){
-      const pct = Math.max(0, Math.min(100, Math.round(score||0)));
-      const r=45, c=2*Math.PI*r, dash = (pct/100)*c;
-      let color = '#27c07d'; if (pct>=67) color='#ff5f5f'; else if (pct>=34) color='#ffb020';
-      return `
-        <svg class="ring" viewBox="0 0 110 110" role="img" aria-label="Risk ${pct}/100">
-          <circle cx="55" cy="55" r="${r}" stroke="#1a2746" stroke-width="12" fill="none"/>
-          <circle cx="55" cy="55" r="${r}" stroke="${color}" stroke-width="12" fill="none"
-                  stroke-dasharray="${dash} ${c-dash}" stroke-linecap="round" transform="rotate(-90 55 55)"/>
-          <text x="55" y="55" text-anchor="middle" dominant-baseline="central" class="num">${pct}</text>
-        </svg>`;
-    }
-    function mdLite(md){
-      if (!md) return "";
-      const esc = s => s.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
-      md = md.replace(/\r\n/g,'\n').trim();
-      md = md.replace(/^#{1,6}\s*(.+)$/gm, (_,t)=>`<h3>${esc(t)}</h3>`);
-      md = md.replace(/\*\*(.+?)\*\*/g,(_,t)=>`<strong>${esc(t)}</strong>`);
-      md = md.replace(/^\s*[-•]\s+(.+)$/gm,(_,t)=>`<li>${esc(t)}</li>`);
-      md = md.replace(/(\n{2,})/g,'</p><p>');
-      md = `<p>${md}</p>`.replace(/(<p>\s*)<li>/g,'<ul><li>').replace(/<\/li>\s*<\/p>/g,'</li></ul>');
-      return md;
-    }
-
-    // ===== Premium narrative helpers =====
-    const TACTIC_ORDER = [
-      "gaslighting","darvo","blame-shifting","minimization","stonewalling","contempt",
-      "guilt-tripping","threats","coercion","triangulation","boundaries","projection"
-    ];
-    const TACTIC_NAME = {
-      "gaslighting":"Gaslighting",
-      "darvo":"DARVO (Deny, Attack, Reverse Victim/Offender)",
-      "blame-shifting":"Blame-shifting",
-      "minimization":"Minimization",
-      "stonewalling":"Stonewalling",
-      "contempt":"Contempt / Insults",
-      "guilt-tripping":"Guilt-tripping",
-      "threats":"Threats",
-      "coercion":"Coercion / Control",
-      "triangulation":"Triangulation",
-      "boundaries":"Boundary Misuse",
-      "projection":"Projection"
-    };
-    const TACTIC_DESC = {
-      "gaslighting":"Denies or distorts reality to make you doubt your memory, perception, or sanity.",
-      "darvo":"Flips roles: denies harm, attacks the accuser, and claims to be the real victim.",
-      "blame-shifting":"Redirects responsibility for their behavior back onto you or others.",
-      "minimization":"Downplays the seriousness of events or your feelings to avoid accountability.",
-      "stonewalling":"Refuses to engage, delays, or shuts down discussion to block resolution.",
-      "contempt":"Mocks, belittles, or insults you; communicates superiority or disgust.",
-      "guilt-tripping":"Leverages guilt to coerce compliance or apology when you did not do wrong.",
-      "threats":"Explicit or implied threats to punish, harm, or abandon if you don’t comply.",
-      "coercion":"Controls choices through pressure, ultimatums, or consequences.",
-      "triangulation":"Pulls in third parties to intimidate, discredit, or create alliances.",
-      "boundaries":"Invokes ‘boundaries’ selectively to dodge accountability or control access.",
-      "projection":"Accuses you of the very behavior they are doing to avoid owning it."
-    };
-    function scoreSynthesize(t){
-      const p = Math.max(0, Math.min(1, t.likelihood ?? 0));
-      const s = Math.max(1, Math.min(5, t.severity ?? 3));
-      const f = Math.max(0, Math.min(5, t.frequency ?? (t.examples?.length||0)));
-      return Math.round(40*p + 35*((s-1)/4) + 25*Math.min(1,f/5));
-    }
-    function scoreFor(tactics, id){
-      const t = (tactics||[]).find(x => (String(x.id||x.name||'').toLowerCase()) === id);
-      if (!t) return 0;
-      if (typeof t.score === 'number') return Math.max(0, Math.min(100, Math.round(t.score)));
-      return scoreSynthesize(t);
-    }
-    function examplesFor(rep, id, limit=6){
-      const receipts = (rep.receipts || rep.receipts?.highlights || []);
-      const grouped = {};
-      for (const r of receipts){
-        const cat = String(r.category || r.tactic || '').toLowerCase();
-        const q = (r.quote || r || '').toString().trim();
-        if (!q) continue;
-        (grouped[cat] ||= []).push(q);
-      }
-      let arr = grouped[id] || [];
-      if (!arr.length){
-        const t = (rep.tactics||[]).find(x => (String(x.id||x.name||'').toLowerCase()) === id);
-        arr = (t && t.examples) ? t.examples : [];
-      }
-      const seen = new Set(), out=[];
-      for (const q of arr){
-        const qq = q.slice(0,280);
-        if (!seen.has(qq)){ out.push(qq); seen.add(qq); }
-        if (out.length >= limit) break;
-      }
-      return out;
-    }
-    function spectrumRowHTML(label, score){
-      const pct = Math.max(0, Math.min(100, Math.round(score)));
-      return `
-        <div class="srow">
-          <div class="lbl">${label}</div>
-          <div class="meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}">
-            <div class="fill" style="width:${pct}%"></div>
-            <div class="caret" style="left: calc(${pct}% - 1px)"></div>
-          </div>
-        </div>`;
-    }
-    function buildPremiumReport(rep){
-      const score = Math.round(rep.risk_score ?? 0);
-      const label = (rep.risk_label || (score<34?'low':score<=66?'medium':'high')).toUpperCase();
-      const confPct = Math.round((rep.confidence ?? 0.85) * 100);
-      const cb = typeof rep.kpis?.communication_balance === 'number' ? Math.round(rep.kpis.communication_balance) : null;
-      const es = typeof rep.kpis?.emotional_stability   === 'number' ? Math.round(rep.kpis.emotional_stability)   : null;
-
-      // Scores header
-      let scoresHTML = `<div class="block"><h3 style="margin:6px 0">Scores</h3>
-        <ul>
-          <li>Manipulation Risk: <strong>${score} / 100 (${label})</strong></li>
-          ${cb !== null ? `<li>Communication Balance: <strong>${cb} / 100</strong></li>` : ''}
-          ${es !== null ? `<li>Emotional Stability: <strong>${es} / 100</strong></li>` : ''}
-          <li>Confidence: <strong>${confPct}%</strong></li>
-        </ul></div>`;
-
-      // Spectrum (all 12)
-      let spectrumHTML = '<div class="block"><h3 style="margin:6px 0">Tactic spectrum</h3><div class="spectrum">';
-      const tacticScores = [];
-      for (const id of TACTIC_ORDER){
-        const s = scoreFor(rep.tactics, id);
-        tacticScores.push({ id, score: s });
-        spectrumHTML += spectrumRowHTML(TACTIC_NAME[id], s);
-      }
-      spectrumHTML += `</div><div class="scale"><span>None</span><span>Low</span><span>Medium</span><span>High</span><span>Severe</span></div></div>`;
-
-      // Top tactics
-      const top = tacticScores.slice().sort((a,b)=>b.score-a.score).slice(0,3).filter(t=>t.score>0);
-      let topHTML = '<div class="block"><h3 style="margin:6px 0">Top tactics (what it looks like)</h3>';
-      if (top.length === 0){
-        topHTML += '<p class="small">No strong manipulation indicators were detected. Some language may still be unhelpful or tense.</p>';
-      } else {
-        for (const t of top){
-          const id = t.id, name = TACTIC_NAME[id];
-          const ex = examplesFor(rep, id, 3);
-          topHTML += `<div class="block">
-            <div class="row" style="align-items:center">
-              <strong>${name}</strong>
-              <span class="pill">${t.score}/100</span>
-            </div>
-            <div class="small" style="margin:6px 0">${TACTIC_DESC[id]}</div>
-            ${ex.length ? `<ul>${ex.map(q=>`<li>“${q}”</li>`).join('')}</ul>` : '<div class="small">Signals present, no quotable snippets extracted.</div>'}
-          </div>`;
-        }
-      }
-      topHTML += '</div>';
-
-      // Executive summary
-      const execHTML = `<div class="block">
-        <h3 style="margin:6px 0">Summary</h3>
-        <p>This conversation shows ${label==='HIGH'?'severe':label==='MEDIUM'?'elevated':'low'} manipulation risk. The most salient patterns are
-          ${top.length ? top.map(t=>TACTIC_NAME[t.id]).join(', ') : 'no strong tactics'}.
-          Use the receipts below as evidence and consider calm boundary-setting responses.</p>
-      </div>`;
-
-      // Receipts grouped
-      let receiptsHTML = '<div class="block"><h3 style="margin:6px 0">Receipts (flagged quotes, grouped)</h3>';
-      const byTactic = {};
-      for (const id of TACTIC_ORDER){
-        const ex = examplesFor(rep, id, 20);
-        if (ex.length){ byTactic[id] = ex; }
-      }
-      if (Object.keys(byTactic).length === 0){
-        receiptsHTML += '<p class="small">No quotable receipts were extracted from the screenshots.</p>';
-      } else {
-        for (const id of TACTIC_ORDER){
-          const arr = byTactic[id]; if (!arr) continue;
-          receiptsHTML += `<h4 style="margin:10px 0 4px">${TACTIC_NAME[id]}</h4><ul>${arr.map(q=>`<li>“${q}”</li>`).join('')}</ul>`;
-        }
-      }
-      receiptsHTML += '</div>';
-
-      // Tips
-      const tipsHTML = `<div class="block">
-        <h3 style="margin:6px 0">Suggested responses (non-escalating)</h3>
-        <ul>
-          <li>“Calling me names doesn’t address the question. Can you answer directly?”</li>
-          <li>“I’m asking about <em>this specific event</em>. Let’s stay with that.”</li>
-          <li>“If we can’t talk respectfully right now, let’s pause and revisit later.”</li>
-        </ul>
-      </div>`;
-
-      return scoresHTML + spectrumHTML + topHTML + execHTML + receiptsHTML + tipsHTML;
-    }
-
-    // ===== Dropzone =====
+    // Initialize
     document.getElementById('apiBaseLabel').textContent = API_BASE;
-    const handleFiles = (list)=>{
-      files = Array.from(list||[]).slice(0, MAX_FILES);
-      setStatus(`${files.length} file(s) selected.`);
+    
+    // File handling
+    const handleFiles = (list) => {
+      files = Array.from(list || []).slice(0, MAX_FILES);
+      updateStatus(`${files.length} file(s) selected`);
       if ($advanced.open) renderCLI();
     };
-    document.getElementById('chooseBtn').onclick = ()=> $fileInput.click();
-    $fileInput.onchange = (e)=> handleFiles(e.target.files);
-    ['dragenter','dragover'].forEach(ev => $dz.addEventListener(ev, (e)=>{ e.preventDefault(); e.stopPropagation(); $dz.classList.add('drag'); }));
-    ;['dragleave','drop'].forEach(ev => $dz.addEventListener(ev, (e)=>{ e.preventDefault(); e.stopPropagation(); $dz.classList.remove('drag'); }));
-    $dz.addEventListener('drop', (e)=> handleFiles(e.dataTransfer.files));
 
-    // ===== CLI fallback generator =====
-    function renderCLI(){
-      if (!files.length){ $cliBlock.textContent = '# Select files first'; return; }
-      const D='$';
-      const names = files.map(f=>`"${f.name}"`).join(' ');
-      const fileJsons = files.map((f,i)=>`{"path":"uploads/${D}JOB_ID/${i}.jpg"}`).join(',');
-      $cliBlock.textContent =
-`# macOS/Linux
-API="${API_BASE}"
-BUCKET="${BUCKET}"
-JOB_ID="$(uuidgen 2>/dev/null || python3 -c 'import uuid;print(uuid.uuid4())')"
-echo "JOB_ID=${D}JOB_ID"
-
-i=0; for f in ${names}; do
-  gsutil cp "\${f}" "gs://${D}BUCKET/uploads/${D}JOB_ID/${D}i.jpg"; i=$((i+1));
-done
-
-curl -sS -X POST "${D}API/jobs" -H "Content-Type: application/json" -d '{
-  "jobId":"'"${D}JOB_ID"'",
-  "plan":"free",
-  "files":[${fileJsons}],
-  "instructions": ${JSON.stringify(JSON.stringify(($context.value||'').trim()))}
-}'
-
-watch -n 3 curl -sS "${D}API/jobs/${D}JOB_ID"
-
-# Windows PowerShell
-${D}Api="${API_BASE}"
-${D}Bucket="${BUCKET}"
-${D}JOB_ID=[guid]::NewGuid().Guid
-"JOB_ID=${D}JOB_ID"
-${files.map((f,i)=>`gsutil cp "${f.name}" "gs://${D}Bucket/uploads/${D}JOB_ID/${i}.jpg"`).join('\n')}
-${D}JobJson=@"
-{ "jobId":"${D}JOB_ID","plan":"free",
-  "files":[${fileJsons}],
-  "instructions": ${JSON.stringify(($context.value||'').trim())}
-}
-"@
-Invoke-RestMethod -Method POST -Uri "${D}Api/jobs" -ContentType "application/json" -Body ${D}JobJson
-while(${D}true){ curl "${D}Api/jobs/${D}JOB_ID"; Start-Sleep 3 }`;
-    }
-    $advanced.addEventListener('toggle', ()=>{ if ($advanced.open) renderCLI(); });
-    $copyCli.onclick = async ()=> { try{ await navigator.clipboard.writeText($cliBlock.textContent); setStatus('CLI copied'); }catch{ setStatus('Copy failed'); } };
-    $confirmCli.onclick = ()=> {
-      const id = prompt('Paste the JOB_ID printed in your terminal:');
-      if (id) addResultCard(id);
+    const updateStatus = (message) => {
+      $status.textContent = message;
     };
 
-    // ===== Primary action =====
-    $generate.onclick = async ()=>{
-      try{
-        if (jobsCount >= FREE_MAX_JOBS) return setStatus('Free plan limit: 1 report. Delete results to run again.');
-        ensureFiles();
+    const updateProgress = (step, message) => {
+      $progressText.textContent = message;
+      // Update step indicators
+      const steps = ['upload', 'analyze', 'report'];
+      const currentIndex = steps.indexOf(step);
+      
+      steps.forEach((s, i) => {
+        const el = document.getElementById(`step-${s}`);
+        el.classList.remove('active', 'complete');
+        if (i < currentIndex) el.classList.add('complete');
+        else if (i === currentIndex) el.classList.add('active');
+      });
+    };
 
-        if ($method.value === 'manual'){
-          $advanced.open = true; renderCLI();
-          setStatus('Manual mode: run the CLI commands shown, then click “Start polling”.');
+    // Event listeners
+    $chooseBtn.onclick = () => $fileInput.click();
+    $fileInput.onchange = (e) => handleFiles(e.target.files);
+
+    // Drag and drop
+    ['dragenter', 'dragover'].forEach(ev => 
+      $dz.addEventListener(ev, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        $dz.classList.add('drag-over');
+      })
+    );
+
+    ['dragleave', 'drop'].forEach(ev => 
+      $dz.addEventListener(ev, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        $dz.classList.remove('drag-over');
+      })
+    );
+
+    $dz.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files));
+    $dz.addEventListener('click', () => $fileInput.click());
+
+    // Main generation function
+    $generate.onclick = async () => {
+      try {
+        if (jobsCount >= FREE_MAX_JOBS) {
+          updateStatus('Free plan limit reached. Delete results to create new analysis.');
           return;
         }
 
-        // Signed URL flow
-        setProg('Requesting upload slots…');
-        const r = await fetch(`${API_BASE}/signed-urls`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ plan:'free', count: files.length }) });
-        const j = await r.json(); if (!r.ok) throw new Error(j.error||'signed-urls failed');
-        const { jobId, urls=[] } = j; if (!jobId || urls.length < files.length) throw new Error('Not enough upload slots');
-
-        setProg('Uploading images…');
-        const metas=[];
-        for (let i=0;i<files.length;i++){
-          const f=files[i], u=urls[i], ct=u.contentType||f.type||'application/octet-stream';
-          const pr = await fetch(u.uploadUrl, { method:'PUT', headers:{'Content-Type':ct}, body:f });
-          if (!pr.ok) throw new Error(`PUT failed for ${f.name} (${pr.status})`);
-          metas.push({ path: u.path, size: f.size, mime: f.type || ct });
+        if (files.length < 2) {
+          updateStatus('Please select at least 2 screenshots');
+          return;
         }
 
-        setProg('Queuing analysis…');
-        const instructions = ($context.value||'').trim();
-        const cr = await fetch(`${API_BASE}/jobs`, { method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ jobId, plan:'free', files: metas, ...(instructions?{instructions}:{} ) })
+        if (files.length > MAX_FILES) {
+          updateStatus(`Maximum ${MAX_FILES} files allowed`);
+          return;
+        }
+
+        $progress.classList.remove('hidden');
+        $generate.disabled = true;
+
+        // Automatic upload flow
+        updateProgress('Requesting upload permissions...');
+        
+        const uploadResponse = await fetch(`${API_BASE}/signed-urls`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan: 'free', count: files.length })
         });
-        const cj = await cr.json(); if (!cr.ok) throw new Error(cj.error||'create job failed');
 
-        setProg('Queued. Polling…');
-        addResultCard(jobId);
-        jobsCount++; setStatus('Job created.');
-      }catch(e){
-        console.error(e);
-        setProg('');
-        setStatus((e && e.message) ? e.message : 'Something went wrong.');
-        if ($method.value==='signed') { $advanced.open = true; renderCLI(); }
-      }
-    };
+        const uploadData = await uploadResponse.json();
+        if (!uploadResponse.ok) throw new Error(uploadData.error || 'Upload request failed');
 
-    // ===== Results & polling =====
-    function addResultCard(id){
-      const frag = resultTpl.content.cloneNode(true);
-      const el = frag.children[0];
-      const $statusEl = el.querySelector('.job-status');
-      const $ring = el.querySelector('.ring-wrap');
-      const $chips = el.querySelector('.tactic-chips');
-      const $rec = el.querySelector('.receipts-list');
-      const $raw = el.querySelector('.raw-json');
-      const $conf = el.querySelector('.conf-val');
-      const $cb = el.querySelector('.cb-val');
-      const $es = el.querySelector('.es-val');
-      const $btnDel = el.querySelector('.btn-delete');
-      const $tabSum = el.querySelector('.tab-sum');
-      const $tabDet = el.querySelector('.tab-det');
-      const $sum = el.querySelector('.sum-view');
-      const $det = el.querySelector('.det-view');
-      const $narr = el.querySelector('.narrative');
-      const $copy = el.querySelector('.btn-copy');
-      const $dl = el.querySelector('.btn-dl');
+        const { jobId, urls = [] } = uploadData;
+        if (!jobId || urls.length < files.length) {
+          throw new Error('Server did not provide enough upload slots');
+        }
 
-      el.querySelector('.job-id').textContent = id;
-      el.querySelector('.job-created').textContent = new Date().toLocaleString();
+        updateProgress('Uploading screenshots...');
+        
+        const fileMetas = [];
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const url = urls[i];
+          const contentType = url.contentType || file.type || 'application/octet-stream';
+          
+          const uploadResult = await fetch(url.uploadUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': contentType },
+            body: file
+          });
 
-      $btnDel.onclick = async ()=>{ try{ await fetch(`${API_BASE}/jobs/${encodeURIComponent(id)}`,{method:'DELETE'});}catch{} el.remove(); jobs = jobs.filter(x=>x.id!==id); };
-
-      $tabSum.onclick = ()=>{ $tabSum.classList.add('active'); $tabDet.classList.remove('active'); $sum.classList.remove('hidden'); $det.classList.add('hidden'); };
-      $tabDet.onclick = ()=>{ $tabDet.classList.add('active'); $tabSum.classList.remove('active'); $det.classList.remove('hidden'); $sum.classList.add('hidden'); };
-
-      $results.prepend(el);
-
-      async function poll(){
-        try{
-          const jr = await fetch(`${API_BASE}/jobs/${encodeURIComponent(id)}`, { cache:'no-store' });
-          const j = await jr.json();
-          const st = (j.status||'').toLowerCase();
-          $statusEl.textContent = st || 'unknown';
-          $statusEl.className = 'pill job-status ' + (st.includes('complete')?'': st.includes('error')?'bad':'warn');
-          if (j.reportId){
-            const rr = await fetch(`${API_BASE}/reports/${encodeURIComponent(j.reportId)}`, { cache:'no-store' });
-            const rep = await rr.json();
-            $raw.textContent = JSON.stringify(rep, null, 2);
-
-            // Summary
-            const score = Math.round(rep.risk_score ?? rep.analysis?.risk_score ?? 0);
-            $ring.innerHTML = riskRingSVG(score);
-            const conf = rep.confidence ?? rep.analysis?.confidence ?? null;
-            $conf.textContent = (typeof conf === 'number') ? `${Math.round(conf*100)}%` : '—';
-            const cb = rep.kpis?.communication_balance; $cb.textContent = (typeof cb==='number') ? `${Math.round(cb)}` : '—';
-            const es = rep.kpis?.emotional_stability;   $es.textContent = (typeof es==='number') ? `${Math.round(es)}` : '—';
-
-            // Tactic chips
-            const tacts = (rep.tactics||[]).slice(0,6);
-            $chips.innerHTML = '';
-            for (const t of tacts){
-              const like = Math.round((t.likelihood||0)*100);
-              const elc = document.createElement('span');
-              elc.className = 'chip';
-              elc.innerHTML = `<strong>${t.name || t.id}</strong>
-                <span class="bar" title="likelihood ${like}%"><i style="width:${like}%"></i></span>`;
-              $chips.appendChild(elc);
-            }
-
-            // Receipts preview
-            const recs = rep.receipts || rep.receipts?.highlights || [];
-            $rec.innerHTML = recs.slice(0,10).map(r=>`<li>“${(r.quote || r).toString()}” <span class="small mono">· ${r.category||'evidence'}</span></li>`).join('');
-
-            // Detailed: premium report (uses receipts + tactics to build grouped narrative)
-            $narr.innerHTML = buildPremiumReport(rep);
-
-            // Copy/Download
-            $copy.onclick = async ()=>{ try{ await navigator.clipboard.writeText($narr.innerText.replace(/\n{3,}/g,'\n\n').trim()); setStatus('Report copied'); }catch{ setStatus('Copy failed'); } };
-            $dl.onclick = ()=>{ const blob = new Blob([$narr.innerText], {type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`toxella_report_${id}.txt`; a.click(); URL.revokeObjectURL(a.href); };
-
-            setProg(''); setStatus('Analysis complete.');
-            return;
+          if (!uploadResult.ok) {
+            throw new Error(`Upload failed for ${file.name} (${uploadResult.status})`);
           }
-          if (st.includes('error')) { setProg(''); return; }
-        }catch{}
-        setTimeout(poll, 2500);
+
+          fileMetas.push({
+            path: url.path,
+            size: file.size,
+            mime: file.type || contentType
+          });
+        }
+
+        updateProgress('Creating analysis job...');
+        
+        const instructions = ($context.value || '').trim();
+        const jobResponse = await fetch(`${API_BASE}/jobs`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jobId,
+            plan: 'free',
+            files: fileMetas,
+            ...(instructions ? { instructions } : {})
+          })
+        });
+
+        const jobData = await jobResponse.json();
+        if (!jobResponse.ok) throw new Error(jobData.error || 'Job creation failed');
+
+        updateProgress('Analysis in progress...');
+        addResultCard(jobId);
+        jobsCount++;
+        updateStatus('Analysis started successfully');
+
+      } catch (error) {
+        console.error('Generation error:', error);
+        updateStatus(error.message || 'Something went wrong');
+        $progress.classList.add('hidden');
+        $generate.disabled = false;
       }
-      poll();
-
-      jobs.push({ id, el });
-    }
-
-    // Delete all on page (best-effort)
-    $deleteAll.onclick = async ()=>{
-      for (const j of jobs){ try{ await fetch(`${API_BASE}/jobs/${encodeURIComponent(j.id)}`, { method:'DELETE' }); }catch{} }
-      $results.innerHTML=''; jobs=[]; jobsCount=0; setStatus('Requested deletion for all jobs (best-effort).');
     };
 
-    // Init
-    setStatus('Ready. Add 2–3 screenshots and click Generate.');
-  </script>
-</body>
-</html>
+    // CLI rendering function
