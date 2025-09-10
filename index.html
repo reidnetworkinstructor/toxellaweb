@@ -796,6 +796,38 @@
     // Initialize
     document.getElementById('apiBaseLabel').textContent = API_BASE;
     
+    // Set up event listeners immediately
+    $chooseBtn.addEventListener('click', () => $fileInput.click());
+    $fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+    
+    // Set up drag and drop
+    $dz.addEventListener('click', () => $fileInput.click());
+    
+    $dz.addEventListener('dragenter', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      $dz.classList.add('drag-over');
+    });
+    
+    $dz.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      $dz.classList.add('drag-over');
+    });
+    
+    $dz.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      $dz.classList.remove('drag-over');
+    });
+    
+    $dz.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      $dz.classList.remove('drag-over');
+      handleFiles(e.dataTransfer.files);
+    });
+    
     // File handling
     const handleFiles = (list) => {
       files = Array.from(list || []).slice(0, MAX_FILES);
