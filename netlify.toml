@@ -1,0 +1,4 @@
+# netlify.toml (at repo root)
+[build]
+  command = ""
+  publish = "."
