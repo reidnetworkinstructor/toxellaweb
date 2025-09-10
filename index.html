@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Toxella — Soft Launch MVP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Toxella MVP: upload 2–3 images, create a job, and view the structured risk report." />
+  <style>
+    :root { --bg:#0b1220; --card:#121a2b; --text:#ebf0ff; --muted:#a4b1d1; --accent:#8ad1ff; --good:#27c07d; --warn:#ffb020; --bad:#ff5f5f; --border:#233055; }
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family: system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;}
+    a{color:var(--accent);text-decoration:none;}
+    a:focus,button:focus,input:focus{outline:2px dashed var(--accent);outline-offset:2px;}
+    .wrap{max-width:880px;margin:0 auto;padding:24px;}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin:16px 0;}
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+    label{font-weight:600;}
+    input[type="file"]{border:1px solid var(--border);background:#0f172a;padding:10px;border-radius:8px;width:100%;}
+    select,input[type="text"]{border:1px solid var(--border);background:#0f172a;color:var(--text);padding:10px;border-radius:8px;}
+    button{background:#1c2742;border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:10px;cursor:pointer;}
+    button.primary{background:#22406a;}
+    button[disabled]{opacity:.55;cursor:not-allowed;}
+    .note{color:var(--muted);font-size:.95rem;}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;white-space:pre-wrap;word-break:break-word;}
+    .pill{font-size:.9rem;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:#0e1630;}
+    .good{color:var(--good);} .warn{color:var(--warn);} .bad{color:var(--bad);}
+    .grid{display:grid;gap:10px;} .grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr));}
+    @media (max-width:640px){.grid.cols-2{grid-template-columns:1fr;}}
+    .divider{height:1px;background:var(--border);margin:14px 0;}
+    .small{font-size:.9rem;color:var(--muted);} .right{text-align:right;margin-left:auto;}
+    code.block{display:block;background:#0a1226;border:1px solid var(--border);padding:12px;border-radius:10px;overflow:auto;}
+    .tag{padding:4px 8px;border-radius:8px;border:1px solid var(--border);}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="card" role="banner" aria-label="Toxella header">
+      <div class="row">
+        <h1 style="margin:0;">🧪 Toxella — MVP</h1>
+        <span class="pill">Free plan: 1 report • up to 3 images</span>
+        <span class="right small">API: <span id="apiBaseLabel" class="mono"></span></span>
+      </div>
+      <p class="note" id="status" aria-live="polite">Ready.</p>
+    </header>
+
+    <main>
+      <section class="card" aria-label="Upload and job creation">
+        <div class="grid cols-2">
+          <div>
+            <label for="method">Upload method</label><br />
+            <select id="method" aria-describedby="method-help">
+              <option value="signed" selected>Signed URLs (automatic)</option>
+              <option value="manual">Manual (CLI)</option>
+            </select>
+            <div id="method-help" class="small">Signed URLs = no terminal. Manual = copy/paste commands.</div>
+          </div>
+          <div>
+            <label for="prefix">Upload prefix (manual only)</label><br />
+            <input id="prefix" type="text" readonly />
+            <div class="small">Manual mode only. Signed URLs ignore this.</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="grid">
+          <div>
+            <label for="files">Choose 2–3 images</label><br />
+            <input id="files" type="file" accept="image/*" multiple aria-describedby="files-help" />
+            <div id="files-help" class="small">We won’t upload in Manual mode; we’ll generate CLI commands for you.</div>
+          </div>
+
+          <div class="row">
+            <button id="btnStart" class="primary">Create Report</button>
+            <button id="btnReset" type="button">Reset</button>
+            <span class="small">By continuing you agree to our <a href="#">Terms</a> & <a href="#">Privacy</a>.</span>
+          </div>
+        </div>
+
+        <div id="manualBlock" class="card" style="display:none; margin-top:16px;">
+          <h3 style="margin-top:0;">Manual (CLI) steps</h3>
+          <p class="note">Run these in your terminal. They upload, create the job, and start polling.</p>
+          <code id="cliSteps" class="block mono"></code>
+          <div class="row" style="margin-top:8px;">
+            <button id="btnConfirmUploaded" class="primary">I ran it — Start polling</button>
+            <button id="btnCopyCli" type="button">Copy commands</button>
+          </div>
+        </div>
+
+        <div id="signedBlock" class="card" style="display:none; margin-top:16px;">
+          <h3 style="margin-top:0;">Signed URL upload</h3>
+          <p class="note">This calls <code>POST /signed-urls</code>, PUTs files to GCS, then creates a job.</p>
+          <div class="row"><button id="btnRunSigned" class="primary">Upload & Create job</button></div>
+          <div id="signedLogs" class="small mono" style="margin-top:10px;"></div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Jobs & results">
+        <div class="row">
+          <h2 style="margin:0;">Results</h2>
+          <button id="btnDeleteAll" class="right" title="Calls DELETE /jobs/{id} (best-effort)">Delete all</button>
+        </div>
+        <div id="jobs"></div>
+      </section>
+
+      <section class="card" aria-label="Privacy note">
+        <h3 style="margin-top:0;">Privacy</h3>
+        <ul>
+          <li>Images auto-delete (storage lifecycle). Only the structured JSON report is stored.</li>
+          <li>“Delete all” is best-effort; you can request deletion at any time.</li>
+          <li>No tracking except aggregate logs for reliability and abuse prevention.</li>
+        </ul>
+        <div class="tag">Stripe “Pro” — coming soon</div>
+      </section>
+    </main>
+  </div>
+
+  <template id="jobTpl">
+    <div class="card">
+      <div class="row">
+        <div><strong>Job</strong> <span class="mono job-id"></span></div>
+        <span class="pill job-status">pending</span>
+        <button class="right btn-delete" title="DELETE /jobs/{id}">Delete</button>
+      </div>
+      <div class="small">Created: <span class="job-created"></span></div>
+      <details style="margin-top:8px;">
+        <summary>Raw JSON</summary>
+        <pre class="mono job-json" style="white-space:pre-wrap;"></pre>
+      </details>
+      <div class="divider"></div>
+      <div class="grid cols-2">
+        <div>
+          <h4 style="margin:4px 0;">Risk</h4>
+          <div class="mono job-risk">—</div>
+        </div>
+        <div>
+          <h4 style="margin:4px 0;">Receipts & Tactics</h4>
+          <div class="mono job-brief">—</div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    // ===== Config =====
+    const DEFAULT_API = "https://toxella-api-yhopcbvaia-uc.a.run.app";
+    const API_BASE = new URLSearchParams(location.search).get("api") || DEFAULT_API;
+    const BUCKET = "toxella-id-uploads"; // manual mode helper only
+    const FREE_PLAN_MAX_JOBS = 1;
+    const MAX_FILES = 3;
+
+    // ===== Elements =====
+    const $status = document.getElementById("status");
+    const $apiBaseLabel = document.getElementById("apiBaseLabel");
+    const $files = document.getElementById("files");
+    const $method = document.getElementById("method");
+    const $prefix = document.getElementById("prefix");
+    const $btnStart = document.getElementById("btnStart");
+    const $btnReset = document.getElementById("btnReset");
+    const $manualBlock = document.getElementById("manualBlock");
+    const $signedBlock = document.getElementById("signedBlock");
+    const $cliSteps = document.getElementById("cliSteps");
+    const $btnConfirmUploaded = document.getElementById("btnConfirmUploaded");
+    const $btnCopyCli = document.getElementById("btnCopyCli");
+    const $btnRunSigned = document.getElementById("btnRunSigned");
+    const $signedLogs = document.getElementById("signedLogs");
+    const $jobs = document.getElementById("jobs");
+    const $btnDeleteAll = document.getElementById("btnDeleteAll");
+    const jobTpl = document.getElementById("jobTpl");
+
+    let createdJobs = [];
+    let jobsCount = 0;
+
+    // ===== Helpers =====
+    function setStatus(msg){ $status.textContent = msg; }
+    function genPrefix(){
+      const t = new Date().toISOString().replace(/[:.]/g,'').replace('T','-').slice(0,15);
+      const r = Math.random().toString(36).slice(2,7);
+      return `web-${t}-${r}`;
+    }
+    function currentFiles(){ return Array.from($files.files || []).slice(0, MAX_FILES); }
+    function ensureLimit(){
+      const f = currentFiles();
+      if (f.length < 2) throw new Error("Please choose at least 2 images.");
+      if (f.length > MAX_FILES) throw new Error(`Please select at most ${MAX_FILES} images.`);
+    }
+    function showBlocks(){
+      $manualBlock.style.display = $method.value === "manual" ? "block" : "none";
+      $signedBlock.style.display = $method.value === "signed" ? "block" : "none";
+    }
+
+    // ===== Job UI & Polling =====
+    function addJobCard(id){
+      const frag = jobTpl.content.cloneNode(true);
+      const el = frag.children[0];
+      el.querySelector(".job-id").textContent = id;
+      el.querySelector(".job-created").textContent = new Date().toLocaleString();
+      const $statusEl = el.querySelector(".job-status");
+      const $json = el.querySelector(".job-json");
+      const $risk = el.querySelector(".job-risk");
+      const $brief = el.querySelector(".job-brief");
+      const $btnDel = el.querySelector(".btn-delete");
+
+      $btnDel.addEventListener("click", async () => {
+        try { await fetch(`${API_BASE}/jobs/${encodeURIComponent(id)}`, { method:"DELETE" }); } catch {}
+        el.remove(); createdJobs = createdJobs.filter(j => j.id !== id);
+        setStatus(`Requested deletion for job ${id}.`);
+      });
+
+      $jobs.prepend(el);
+
+      async function poll(){
+        try{
+          const jr = await fetch(`${API_BASE}/jobs/${encodeURIComponent(id)}`, { cache:"no-store" });
+          const j = await jr.json();
+          $json.textContent = JSON.stringify(j, null, 2);
+          const st = (j.status || "").toLowerCase();
+          $statusEl.textContent = st || "unknown";
+          $statusEl.className = "pill job-status " + (st.includes("done")||st.includes("succeed") ? "good" :
+                                                     st.includes("fail")||st.includes("error") ? "bad" : "warn");
+          if (j.reportId){
+            // fetch full report and render
+            const rr = await fetch(`${API_BASE}/reports/${encodeURIComponent(j.reportId)}`);
+            const rep = await rr.json();
+            $json.textContent = JSON.stringify(rep, null, 2);
+            const score = rep.risk_score ?? rep.score ?? null;
+            const tactics = rep.tactics || [];
+            const receipts = rep.receipts || [];
+            $risk.textContent = score != null ? `risk_score: ${score}` : "—";
+            const parts = [];
+            if (tactics.length) parts.push(`tactics: ${tactics.join(", ")}`);
+            if (receipts.length) parts.push(`receipts: ${receipts.length}`);
+            $brief.textContent = parts.length ? parts.join(" • ") : "—";
+            return; // terminal
+          }
+          if (st.includes("fail") || st.includes("error")) return;
+        } catch {}
+        setTimeout(poll, 3000);
+      }
+      poll();
+
+      createdJobs.push({ id, el });
+    }
+
+    // ===== Signed URL flow (matches your backend) =====
+    async function runSignedFlow(files){
+      $signedLogs.textContent = "";
+      const log = (t) => $signedLogs.textContent += t + "\n";
+
+      // 1) Get upload slots
+      let jobId, urls;
+      try{
+        log("Requesting signed URLs…");
+        const r = await fetch(`${API_BASE}/signed-urls`, {
+          method:"POST", headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify({ plan:"free", count: files.length })
+        });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || "signed-urls failed");
+        jobId = j.jobId; urls = j.urls || [];
+        if (!jobId || urls.length < files.length) throw new Error("API did not return enough upload slots");
+        log(`Got jobId: ${jobId}`);
+      }catch(e){ log(`❌ Signed URLs failed: ${e.message || e}`); return; }
+
+      // 2) PUT files
+      const fileMeta = [];
+      for (let i=0;i<files.length;i++){
+        const f = files[i], u = urls[i];
+        log(`Uploading ${f.name} → ${u.path} …`);
+        try{
+          const ct = u.contentType || f.type || "application/octet-stream";
+          const pr = await fetch(u.uploadUrl, { method:"PUT", headers:{ "Content-Type": ct }, body: f });
+          if (!pr.ok) throw new Error(`PUT ${pr.status}`);
+          log(`✅ Uploaded ${f.name}`);
+          fileMeta.push({ path: u.path, size: f.size, mime: f.type || ct });
+        }catch(e){ log(`❌ Upload failed for ${f.name}: ${e.message || e}`); }
+      }
+      if (!fileMeta.length){ log("No files uploaded; cannot create job."); return; }
+
+      // 3) Create job
+      try{
+        const cr = await fetch(`${API_BASE}/jobs`, {
+          method:"POST", headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify({ jobId, plan:"free", files: fileMeta })
+        });
+        const cj = await cr.json();
+        if (!cr.ok) throw new Error(cj.error || "create job failed");
+        log(`Job queued: ${jobId}`);
+        addJobCard(jobId);
+        jobsCount++; if (jobsCount >= FREE_PLAN_MAX_JOBS) document.getElementById("btnStart").disabled = true;
+        setStatus("Job created.");
+      }catch(e){ log(`❌ Create job failed: ${e.message || e}`); }
+    }
+
+    // ===== Manual (CLI) generator — updated to your backend =====
+    function renderCli(files){
+      const bash = `
+# ==== macOS/Linux (bash) ====
+API="${API_BASE}"
+BUCKET="${BUCKET}"
+JOB_ID="$(uuidgen 2>/dev/null || python3 - <<'PY'\nimport uuid;print(uuid.uuid4())\nPY\n)"
+echo "JOB_ID=$JOB_ID"
+
+# 1) Upload as uploads/$JOB_ID/0.jpg,1.jpg,2.jpg
+i=0; for f in ${files.map(f=>`"${f.name}"`).join(" ")}; do
+  gsutil cp "$f" "gs://$BUCKET/uploads/$JOB_ID/${'$'}i.jpg"; i=$((i+1));
+done
+
+# 2) Create job
+curl -sS -X POST "$API/jobs" -H "Content-Type: application/json" -d '{
+  "jobId":"'"'${'$'}JOB_ID'"'",
+  "plan":"free",
+  "files":[
+    {"path":"uploads/'${'$'}'JOB_ID'/0.jpg"}${files.length>1?',{"path":"uploads/'+'${'$'}JOB_ID'+'/1.jpg"}':''}${files.length>2?',{"path":"uploads/'+'${'$'}JOB_ID'+'/2.jpg"}':''}
+  ]
+}'
+
+# 3) Poll
+watch -n 3 curl -sS "$API/jobs/${'$'}JOB_ID"
+`.trim();
+
+      const pwsh = `
+# ==== Windows PowerShell ====
+$Api    = "${API_BASE}"
+$Bucket = "${BUCKET}"
+$JOB_ID = [guid]::NewGuid().Guid
+"JOB_ID=$JOB_ID"
+
+# 1) Upload as uploads/$JOB_ID/0.jpg,1.jpg,2.jpg
+${files.map((f,i)=>`gsutil cp "${f.name}" "gs://$Bucket/uploads/$JOB_ID/${i}.jpg"`).join("\n")}
+
+# 2) Create job
+$JobJson = @"
+{ "jobId": "$JOB_ID", "plan": "free",
+  "files": [
+    { "path": "uploads/$JOB_ID/0.jpg" }${files.length>1?', { "path": "uploads/$JOB_ID/1.jpg" }':''}${files.length>2?', { "path": "uploads/$JOB_ID/2.jpg" }':''}
+  ]
+}
+"@
+$resp = Invoke-RestMethod -Method POST -Uri "$Api/jobs" -ContentType "application/json" -Body $JobJson
+$resp | ConvertTo-Json -Depth 10
+
+# 3) Poll
+while ($true) { curl "$Api/jobs/$JOB_ID"; Start-Sleep -Seconds 3 }
+`.trim();
+
+      $cliSteps.textContent = `${bash}\n\n${pwsh}`;
+    }
+
+    // ===== Init & events =====
+    (function init(){
+      $apiBaseLabel.textContent = API_BASE;
+      $prefix.value = genPrefix();
+      $method.value = 'signed';
+      showBlocks();
+      setStatus("Ready. Select images and click Create Report.");
+
+      $method.addEventListener("change", showBlocks);
+
+      $btnReset.addEventListener("click", () => {
+        $files.value = ""; $prefix.value = genPrefix(); setStatus("Reset.");
+      });
+
+      $btnStart.addEventListener("click", async () => {
+        try{
+          if (jobsCount >= FREE_PLAN_MAX_JOBS) return setStatus("Free plan limit reached (1 report).");
+          ensureLimit();
+          const files = currentFiles();
+          if ($method.value === "manual"){
+            renderCli(files); $manualBlock.style.display = "block";
+            setStatus("Run the CLI shown below, then click ‘I ran it — Start polling’.");
+          } else {
+            $signedBlock.style.display = "block"; setStatus("Starting upload…");
+            await runSignedFlow(files);
+          }
+        }catch(e){ setStatus(e.message || String(e)); }
+      });
+
+      $btnRunSigned.addEventListener("click", async () => {
+        try{ ensureLimit(); await runSignedFlow(currentFiles()); }
+        catch(e){ setStatus(e.message || String(e)); }
+      });
+
+      $btnCopyCli.addEventListener("click", async () => {
+        try{ await navigator.clipboard.writeText($cliSteps.textContent); setStatus("Copied CLI commands."); }
+        catch{ setStatus("Could not copy. Select the block and copy manually."); }
+      });
+
+      // Manual flow helper: start polling an existing job id
+      $btnConfirmUploaded.addEventListener("click", () => {
+        const jobId = prompt("Paste the JOB_ID printed by the CLI (or the id in the POST /jobs response):");
+        if (jobId) addJobCard(jobId);
+        else setStatus("No job ID entered.");
+      });
+
+      $btnDeleteAll.addEventListener("click", async () => {
+        const ids = createdJobs.map(j => j.id);
+        for (const id of ids){ try{ await fetch(`${API_BASE}/jobs/${encodeURIComponent(id)}`, { method:"DELETE" }); }catch{} }
+        $jobs.innerHTML = ""; createdJobs = []; jobsCount = 0; $btnStart.disabled = false;
+        setStatus("Requested deletion for all jobs (best-effort).");
+      });
+    })();
+  </script>
+</body>
+</html>
