@@ -938,4 +938,121 @@
       }
     };
 
-    // CLI rendering function
+    // Add missing result card and other functions
+    function addResultCard(jobId) {
+      const frag = resultTpl.content.cloneNode(true);
+      const el = frag.children[0];
+      const $statusEl = el.querySelector('.job-status');
+      const $btnDel = el.querySelector('.btn-delete');
+      const $tabSum = el.querySelector('.tab-sum');
+      const $tabDet = el.querySelector('.tab-det');
+      const $tabRaw = el.querySelector('.tab');
+      const $sum = el.querySelector('.sum-view');
+      const $det = el.querySelector('.det-view');
+      const $raw = el.querySelector('.raw-view');
+      const $rawJson = el.querySelector('.raw-json');
+
+      el.querySelector('.job-id').textContent = jobId;
+
+      // Tab switching
+      const tabs = el.querySelectorAll('.tab');
+      const views = [el.querySelector('.sum-view'), el.querySelector('.det-view'), el.querySelector('.raw-view')];
+      
+      tabs.forEach((tab, index) => {
+        tab.onclick = () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          views.forEach(v => v.classList.add('hidden'));
+          tab.classList.add('active');
+          views[index].classList.remove('hidden');
+        };
+      });
+
+      $btnDel.onclick = async () => {
+        try { 
+          await fetch(`${API_BASE}/jobs/${encodeURIComponent(jobId)}`, {method: 'DELETE'}); 
+        } catch(e) {}
+        el.remove();
+        jobs = jobs.filter(j => j.id !== jobId);
+        updateStatus('Job deleted');
+      };
+
+      $results.querySelector('.text-sm').style.display = 'none';
+      $results.appendChild(el);
+
+      // Polling function
+      async function poll() {
+        try {
+          const response = await fetch(`${API_BASE}/jobs/${encodeURIComponent(jobId)}`, { cache: 'no-store' });
+          const job = await response.json();
+          
+          const status = (job.status || '').toLowerCase();
+          $statusEl.textContent = status || 'unknown';
+          $statusEl.className = `result-status status-${status.includes('complete') ? 'complete' : status.includes('error') ? 'error' : 'processing'}`;
+
+          if (job.reportId) {
+            const reportResponse = await fetch(`${API_BASE}/reports/${encodeURIComponent(job.reportId)}`, { cache: 'no-store' });
+            const report = await reportResponse.json();
+            
+            $rawJson.textContent = JSON.stringify(report, null, 2);
+            
+            // Update summary view with report data
+            const score = Math.round(report.risk_score ?? report.analysis?.risk_score ?? 0);
+            const ringWrap = el.querySelector('.ring-wrap');
+            ringWrap.innerHTML = riskRingSVG(score);
+            
+            // Update metrics
+            const conf = report.confidence ?? report.analysis?.confidence ?? null;
+            el.querySelector('.conf-val').textContent = (typeof conf === 'number') ? `${Math.round(conf*100)}%` : '—';
+            
+            $progress.classList.add('hidden');
+            $generate.disabled = false;
+            updateStatus('Analysis complete');
+            return;
+          }
+
+          if (status.includes('error')) {
+            $progress.classList.add('hidden');
+            $generate.disabled = false;
+            updateStatus('Analysis failed');
+            return;
+          }
+
+        } catch(e) {
+          console.error('Polling error:', e);
+        }
+        
+        setTimeout(poll, 3000);
+      }
+
+      poll();
+      jobs.push({ id: jobId, el });
+    }
+
+    function riskRingSVG(score) {
+      const pct = Math.max(0, Math.min(100, Math.round(score || 0)));
+      const r = 45, c = 2 * Math.PI * r, dash = (pct / 100) * c;
+      let color = '#38a169'; // success
+      if (pct >= 67) color = '#e53e3e'; // danger
+      else if (pct >= 34) color = '#ed8936'; // warning
+      
+      return `
+        <svg class="risk-circle" viewBox="0 0 120 120" role="img" aria-label="Risk ${pct}/100">
+          <circle cx="60" cy="60" r="${r}" stroke="#e2e8f0" stroke-width="8" fill="none"/>
+          <circle cx="60" cy="60" r="${r}" stroke="${color}" stroke-width="8" fill="none"
+                  stroke-dasharray="${dash} ${c-dash}" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+          <text x="60" y="60" text-anchor="middle" dominant-baseline="central" class="risk-value">${pct}</text>
+        </svg>`;
+    }
+
+    // Delete all functionality
+    $deleteAll.onclick = async () => {
+      for (const job of jobs) {
+        try {
+          await fetch(`${API_BASE}/jobs/${encodeURIComponent(job.id)}`, { method: 'DELETE' });
+        } catch(e) {}
+      }
+      $results.innerHTML = '<div class="text-sm" style="text-align: center; padding: 48px 0; color: var(--text-muted);">No analyses yet. Upload screenshots above to get started.</div>';
+      jobs = [];
+      jobsCount = 0;
+      updateStatus('All results cleared');
+    };
