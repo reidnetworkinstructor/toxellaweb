@@ -222,13 +222,32 @@
             const rr = await fetch(`${API_BASE}/reports/${encodeURIComponent(j.reportId)}`);
             const rep = await rr.json();
             $json.textContent = JSON.stringify(rep, null, 2);
-            const score = rep.risk_score ?? rep.score ?? null;
+            
+            // Extract data from the actual report structure
+            const score = rep.analysis?.risk_score ?? rep.risk_score ?? rep.score ?? null;
+            const riskBucket = rep.analysis?.risk_bucket ?? "";
+            const confidence = rep.analysis?.confidence ?? "";
             const tactics = rep.tactics || [];
-            const receipts = rep.receipts || [];
-            $risk.textContent = score != null ? `risk_score: ${score}` : "—";
+            const receipts = rep.receipts?.highlights || rep.receipts || [];
+            
+            // Display risk score with bucket and confidence
+            let riskText = "—";
+            if (score != null) {
+              riskText = `${score}/100`;
+              if (riskBucket) riskText += ` (${riskBucket})`;
+              if (confidence) riskText += ` • ${Math.round(confidence * 100)}% confidence`;
+            }
+            $risk.textContent = riskText;
+            
+            // Display tactics and receipts
             const parts = [];
-            if (tactics.length) parts.push(`tactics: ${tactics.join(", ")}`);
-            if (receipts.length) parts.push(`receipts: ${receipts.length}`);
+            if (tactics.length) {
+              const tacticNames = tactics.map(t => t.name || t).join(", ");
+              parts.push(`tactics: ${tacticNames}`);
+            }
+            if (receipts.length) {
+              parts.push(`${receipts.length} evidence quotes`);
+            }
             $brief.textContent = parts.length ? parts.join(" • ") : "—";
             return; // terminal
           }
