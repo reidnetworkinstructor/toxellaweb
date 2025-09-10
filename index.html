@@ -66,7 +66,7 @@
           <div>
             <label for="files">Choose 2–3 images</label><br />
             <input id="files" type="file" accept="image/*" multiple aria-describedby="files-help" />
-            <div id="files-help" class="small">We won’t upload in Manual mode; we’ll generate CLI commands for you.</div>
+            <div id="files-help" class="small">We won't upload in Manual mode; we'll generate CLI commands for you.</div>
           </div>
 
           <div class="row">
@@ -106,10 +106,10 @@
         <h3 style="margin-top:0;">Privacy</h3>
         <ul>
           <li>Images auto-delete (storage lifecycle). Only the structured JSON report is stored.</li>
-          <li>“Delete all” is best-effort; you can request deletion at any time.</li>
+          <li>"Delete all" is best-effort; you can request deletion at any time.</li>
           <li>No tracking except aggregate logs for reliability and abuse prevention.</li>
         </ul>
-        <div class="tag">Stripe “Pro” — coming soon</div>
+        <div class="tag">Stripe "Pro" — coming soon</div>
       </section>
     </main>
   </div>
@@ -291,57 +291,53 @@
       }catch(e){ log(`❌ Create job failed: ${e.message || e}`); }
     }
 
-    // ===== Manual (CLI) generator — updated to your backend =====
+    // ===== Manual (CLI) generator — FIXED =====
     function renderCli(files){
-      const bash = `
-# ==== macOS/Linux (bash) ====
+      const DOLLAR = '$';
+      const fileList = files.map(f => `"${f.name}"`).join(" ");
+      const fileJsons = files.map((f, i) => `{"path":"uploads/${DOLLAR}JOB_ID/${i}.jpg"}`).join(',');
+      
+      const bash = `# ==== macOS/Linux (bash) ====
 API="${API_BASE}"
 BUCKET="${BUCKET}"
-JOB_ID="$(uuidgen 2>/dev/null || python3 - <<'PY'\nimport uuid;print(uuid.uuid4())\nPY\n)"
-echo "JOB_ID=$JOB_ID"
+JOB_ID="$(uuidgen 2>/dev/null || python3 -c 'import uuid;print(uuid.uuid4())')"
+echo "JOB_ID=${DOLLAR}JOB_ID"
 
-# 1) Upload as uploads/$JOB_ID/0.jpg,1.jpg,2.jpg
-i=0; for f in ${files.map(f=>`"${f.name}"`).join(" ")}; do
-  gsutil cp "$f" "gs://$BUCKET/uploads/$JOB_ID/${'$'}i.jpg"; i=$((i+1));
+# 1) Upload as uploads/${DOLLAR}JOB_ID/0.jpg,1.jpg,2.jpg
+i=0; for f in ${fileList}; do
+  gsutil cp "${DOLLAR}f" "gs://${DOLLAR}BUCKET/uploads/${DOLLAR}JOB_ID/${DOLLAR}i.jpg"; i=$((i+1));
 done
 
 # 2) Create job
-curl -sS -X POST "$API/jobs" -H "Content-Type: application/json" -d '{
-  "jobId":"'"'${'$'}JOB_ID'"'",
+curl -sS -X POST "${DOLLAR}API/jobs" -H "Content-Type: application/json" -d '{
+  "jobId":"'"${DOLLAR}JOB_ID"'",
   "plan":"free",
-  "files":[
-    {"path":"uploads/'${'$'}'JOB_ID'/0.jpg"}${files.length>1?',{"path":"uploads/'+'${'$'}JOB_ID'+'/1.jpg"}':''}${files.length>2?',{"path":"uploads/'+'${'$'}JOB_ID'+'/2.jpg"}':''}
-  ]
+  "files":[${fileJsons}]
 }'
 
 # 3) Poll
-watch -n 3 curl -sS "$API/jobs/${'$'}JOB_ID"
-`.trim();
+watch -n 3 curl -sS "${DOLLAR}API/jobs/${DOLLAR}JOB_ID"`;
 
-      const pwsh = `
-# ==== Windows PowerShell ====
-$Api    = "${API_BASE}"
-$Bucket = "${BUCKET}"
-$JOB_ID = [guid]::NewGuid().Guid
-"JOB_ID=$JOB_ID"
+      const pwsh = `# ==== Windows PowerShell ====
+${DOLLAR}Api    = "${API_BASE}"
+${DOLLAR}Bucket = "${BUCKET}"
+${DOLLAR}JOB_ID = [guid]::NewGuid().Guid
+"JOB_ID=${DOLLAR}JOB_ID"
 
-# 1) Upload as uploads/$JOB_ID/0.jpg,1.jpg,2.jpg
-${files.map((f,i)=>`gsutil cp "${f.name}" "gs://$Bucket/uploads/$JOB_ID/${i}.jpg"`).join("\n")}
+# 1) Upload as uploads/${DOLLAR}JOB_ID/0.jpg,1.jpg,2.jpg
+${files.map((f,i)=>`gsutil cp "${f.name}" "gs://${DOLLAR}Bucket/uploads/${DOLLAR}JOB_ID/${i}.jpg"`).join("\n")}
 
 # 2) Create job
-$JobJson = @"
-{ "jobId": "$JOB_ID", "plan": "free",
-  "files": [
-    { "path": "uploads/$JOB_ID/0.jpg" }${files.length>1?', { "path": "uploads/$JOB_ID/1.jpg" }':''}${files.length>2?', { "path": "uploads/$JOB_ID/2.jpg" }':''}
-  ]
+${DOLLAR}JobJson = @"
+{ "jobId": "${DOLLAR}JOB_ID", "plan": "free",
+  "files": [${fileJsons}]
 }
 "@
-$resp = Invoke-RestMethod -Method POST -Uri "$Api/jobs" -ContentType "application/json" -Body $JobJson
-$resp | ConvertTo-Json -Depth 10
+${DOLLAR}resp = Invoke-RestMethod -Method POST -Uri "${DOLLAR}Api/jobs" -ContentType "application/json" -Body ${DOLLAR}JobJson
+${DOLLAR}resp | ConvertTo-Json -Depth 10
 
 # 3) Poll
-while ($true) { curl "$Api/jobs/$JOB_ID"; Start-Sleep -Seconds 3 }
-`.trim();
+while (${DOLLAR}true) { curl "${DOLLAR}Api/jobs/${DOLLAR}JOB_ID"; Start-Sleep -Seconds 3 }`;
 
       $cliSteps.textContent = `${bash}\n\n${pwsh}`;
     }
@@ -367,7 +363,7 @@ while ($true) { curl "$Api/jobs/$JOB_ID"; Start-Sleep -Seconds 3 }
           const files = currentFiles();
           if ($method.value === "manual"){
             renderCli(files); $manualBlock.style.display = "block";
-            setStatus("Run the CLI shown below, then click ‘I ran it — Start polling’.");
+            setStatus("Run the CLI shown below, then click 'I ran it — Start polling'.");
           } else {
             $signedBlock.style.display = "block"; setStatus("Starting upload…");
             await runSignedFlow(files);
@@ -398,6 +394,27 @@ while ($true) { curl "$Api/jobs/$JOB_ID"; Start-Sleep -Seconds 3 }
         $jobs.innerHTML = ""; createdJobs = []; jobsCount = 0; $btnStart.disabled = false;
         setStatus("Requested deletion for all jobs (best-effort).");
       });
+
+      // Add debugging - test API connection on load
+      console.log("Testing API connection...");
+      fetch(`${API_BASE}/signed-urls`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: 'free', count: 2 })
+      })
+      .then(response => {
+        console.log("API response status:", response.status);
+        return response.json();
+      })
+      .then(data => {
+        console.log("API test successful:", data);
+        setStatus("API connected successfully!");
+      })
+      .catch(error => {
+        console.error("API test failed:", error);
+        setStatus(`API connection failed: ${error.message}`);
+      });
+
     })();
   </script>
 </body>
