@@ -12,567 +12,187 @@
       --bg-secondary: #ffffff;
       --bg-tertiary: #f5f7fa;
       --bg-accent: #f0f4ff;
-      
+
       --text-primary: #1a1d29;
       --text-secondary: #4a5568;
       --text-muted: #718096;
       --text-inverse: #ffffff;
-      
+
       --border-light: #e2e8f0;
       --border-medium: #cbd5e0;
       --border-focus: #4299e1;
-      
+
       --accent: #4299e1;
       --accent-dark: #2b6cb0;
       --success: #38a169;
       --warning: #ed8936;
       --danger: #e53e3e;
-      
+
       --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
       --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      
+
       --radius-sm: 6px;
       --radius-md: 8px;
       --radius-lg: 12px;
       --radius-xl: 16px;
-      
+
       --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     html, body {
-      margin: 0;
-      padding: 0;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      font-family: var(--font-sans);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      margin: 0; padding: 0; background: var(--bg-primary); color: var(--text-primary);
+      font-family: var(--font-sans); line-height: 1.6;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
     }
 
     /* Layout */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
-    .section {
-      margin: 32px 0;
-    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .section { margin: 32px 0; }
 
     .card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
-      overflow: hidden;
+      background: var(--bg-secondary); border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden;
     }
-
-    .card-header {
-      padding: 24px 24px 0;
-    }
-
-    .card-body {
-      padding: 24px;
-    }
-
+    .card-header { padding: 24px 24px 0; }
+    .card-body { padding: 24px; }
     .card-footer {
-      padding: 0 24px 24px;
-      border-top: 1px solid var(--border-light);
-      margin-top: 24px;
-      padding-top: 24px;
+      padding: 0 24px 24px; border-top: 1px solid var(--border-light); margin-top: 24px; padding-top: 24px;
     }
 
     /* Typography */
     h1 {
-      font-size: 2.5rem;
-      font-weight: 700;
-      letter-spacing: -0.025em;
-      margin: 0;
+      font-size: 2.5rem; font-weight: 700; letter-spacing: -0.025em; margin: 0;
       background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-
-    h2 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin: 0 0 16px 0;
-      color: var(--text-primary);
-    }
-
-    h3 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin: 0 0 12px 0;
-      color: var(--text-primary);
-    }
-
-    .text-sm {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-    }
-
-    .text-xs {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
+    h2 { font-size: 1.5rem; font-weight: 600; margin: 0 0 16px 0; color: var(--text-primary); }
+    h3 { font-size: 1.25rem; font-weight: 600; margin: 0 0 12px 0; color: var(--text-primary); }
+    .text-sm { font-size: 0.875rem; color: var(--text-muted); }
+    .text-xs { font-size: 0.75rem; color: var(--text-muted); }
 
     /* Header */
     .header {
       background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-accent) 100%);
-      border-bottom: 1px solid var(--border-light);
-      padding: 32px 0;
+      border-bottom: 1px solid var(--border-light); padding: 32px 0;
     }
-
-    .header-content {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
+    .header-content { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
     .brand-icon {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      color: white;
+      width: 48px; height: 48px; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+      border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 24px; color: white;
     }
-
-    .status-bar {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
+    .status-bar { display: flex; align-items: center; gap: 16px; }
     .status-indicator {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-md);
-      font-size: 0.875rem;
+      display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--bg-secondary);
+      border: 1px solid var(--border-light); border-radius: var(--radius-md); font-size: 0.875rem;
     }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--success);
-    }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
 
     /* Upload Zone */
     .upload-zone {
-      border: 2px dashed var(--border-medium);
-      border-radius: var(--radius-lg);
-      padding: 48px 24px;
-      text-align: center;
-      background: var(--bg-tertiary);
-      transition: all 0.2s ease;
-      cursor: pointer;
+      border: 2px dashed var(--border-medium); border-radius: var(--radius-lg);
+      padding: 48px 24px; text-align: center; background: var(--bg-tertiary);
+      transition: all 0.2s ease; cursor: pointer;
     }
-
-    .upload-zone:hover,
-    .upload-zone.drag-over {
-      border-color: var(--accent);
-      background: var(--bg-accent);
-      transform: translateY(-2px);
-    }
-
-    .upload-icon {
-      width: 64px;
-      height: 64px;
-      margin: 0 auto 16px;
-      background: var(--accent);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 24px;
-    }
-
-    .upload-text {
-      font-size: 1.125rem;
-      font-weight: 500;
-      margin-bottom: 8px;
-      color: var(--text-primary);
-    }
-
-    .upload-hint {
-      color: var(--text-muted);
-      margin-bottom: 24px;
-    }
+    .upload-zone:hover, .upload-zone.drag-over { border-color: var(--accent); background: var(--bg-accent); transform: translateY(-2px); }
+    .upload-icon { width: 64px; height: 64px; margin: 0 auto 16px; background: var(--accent); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; }
+    .upload-text { font-size: 1.125rem; font-weight: 500; margin-bottom: 8px; color: var(--text-primary); }
+    .upload-hint { color: var(--text-muted); margin-bottom: 24px; }
 
     /* Forms */
-    .form-group {
-      margin-bottom: 24px;
+    .form-group { margin-bottom: 24px; }
+    .form-label { display: block; font-weight: 500; margin-bottom: 8px; color: var(--text-primary); }
+    .form-input, .form-textarea, .form-select {
+      width: 100%; padding: 12px 16px; border: 1px solid var(--border-medium); border-radius: var(--radius-md);
+      background: var(--bg-secondary); color: var(--text-primary); font-size: 1rem; transition: all 0.2s ease;
     }
-
-    .form-label {
-      display: block;
-      font-weight: 500;
-      margin-bottom: 8px;
-      color: var(--text-primary);
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
     }
-
-    .form-input,
-    .form-textarea,
-    .form-select {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid var(--border-medium);
-      border-radius: var(--radius-md);
-      background: var(--bg-secondary);
-      color: var(--text-primary);
-      font-size: 1rem;
-      transition: all 0.2s ease;
-    }
-
-    .form-input:focus,
-    .form-textarea:focus,
-    .form-select:focus {
-      outline: none;
-      border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
-    }
-
-    .form-textarea {
-      min-height: 120px;
-      resize: vertical;
-    }
-
-    .form-help {
-      margin-top: 6px;
-      font-size: 0.875rem;
-      color: var(--text-muted);
-    }
+    .form-textarea { min-height: 120px; resize: vertical; }
+    .form-help { margin-top: 6px; font-size: 0.875rem; color: var(--text-muted); }
 
     /* Buttons */
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 24px;
-      border: 1px solid transparent;
-      border-radius: var(--radius-md);
-      font-weight: 500;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border: 1px solid transparent;
+      border-radius: var(--radius-md); font-weight: 500; font-size: 1rem; cursor: pointer; transition: all 0.2s ease; text-decoration: none;
     }
-
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: var(--text-inverse);
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      background: var(--accent-dark);
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .btn-secondary {
-      background: var(--bg-secondary);
-      border-color: var(--border-medium);
-      color: var(--text-primary);
-    }
-
-    .btn-secondary:hover:not(:disabled) {
-      background: var(--bg-tertiary);
-      border-color: var(--border-focus);
-    }
-
-    .btn-danger {
-      background: var(--danger);
-      color: var(--text-inverse);
-    }
-
-    .btn-danger:hover:not(:disabled) {
-      background: #c53030;
-    }
-
-    .btn-lg {
-      padding: 16px 32px;
-      font-size: 1.125rem;
-    }
-
-    .btn-sm {
-      padding: 8px 16px;
-      font-size: 0.875rem;
-    }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-primary { background: var(--accent); color: var(--text-inverse); }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .btn-secondary { background: var(--bg-secondary); border-color: var(--border-medium); color: var(--text-primary); }
+    .btn-secondary:hover:not(:disabled) { background: var(--bg-tertiary); border-color: var(--border-focus); }
+    .btn-danger { background: var(--danger); color: var(--text-inverse); }
+    .btn-danger:hover:not(:disabled) { background: #c53030; }
+    .btn-lg { padding: 16px 32px; font-size: 1.125rem; }
+    .btn-sm { padding: 8px 16px; font-size: 0.875rem; }
 
     /* Grid */
-    .grid {
-      display: grid;
-      gap: 24px;
-    }
-
-    .grid-2 {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
+    .grid { display: grid; gap: 24px; }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
     @media (max-width: 768px) {
-      .grid-2 {
-        grid-template-columns: 1fr;
-      }
-      
-      .header-content {
-        flex-direction: column;
-        text-align: center;
-      }
+      .grid-2 { grid-template-columns: 1fr; }
+      .header-content { flex-direction: column; text-align: center; }
     }
 
     /* Progress */
-    .progress {
-      margin: 16px 0;
-      padding: 16px;
-      background: var(--bg-accent);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-md);
-      color: var(--text-secondary);
-    }
-
-    .progress-steps {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-top: 12px;
-    }
-
-    .progress-step {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--text-muted);
-    }
-
-    .progress-step.active {
-      color: var(--accent);
-    }
-
-    .progress-step.complete {
-      color: var(--success);
-    }
+    .progress { margin: 16px 0; padding: 16px; background: var(--bg-accent); border: 1px solid var(--border-light);
+      border-radius: var(--radius-md); color: var(--text-secondary); }
+    .progress-steps { display: flex; align-items: center; gap: 16px; margin-top: 12px; }
+    .progress-step { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
+    .progress-step.active { color: var(--accent); }
+    .progress-step.complete { color: var(--success); }
 
     /* Results */
-    .result-card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-lg);
-      margin-bottom: 24px;
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .result-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--border-light);
-      background: var(--bg-tertiary);
-    }
-
-    .result-meta {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .result-status {
-      padding: 4px 12px;
-      border-radius: var(--radius-sm);
-      font-size: 0.75rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .status-pending {
-      background: #fef5e7;
-      color: #744210;
-    }
-
-    .status-processing {
-      background: #e6fffa;
-      color: #065f46;
-    }
-
-    .status-complete {
-      background: #d1fae5;
-      color: #065f46;
-    }
-
-    .status-error {
-      background: #fee2e2;
-      color: #991b1b;
-    }
+    .result-card { background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: var(--radius-lg);
+      margin-bottom: 24px; overflow: hidden; box-shadow: var(--shadow-sm); }
+    .result-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px;
+      border-bottom: 1px solid var(--border-light); background: var(--bg-tertiary); }
+    .result-meta { display: flex; align-items: center; gap: 12px; }
+    .result-status { padding: 4px 12px; border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.05em; }
+    .status-pending { background: #fef5e7; color: #744210; }
+    .status-processing { background: #e6fffa; color: #065f46; }
+    .status-complete { background: #d1fae5; color: #065f46; }
+    .status-error { background: #fee2e2; color: #991b1b; }
 
     /* Risk Visualization */
-    .risk-display {
-      display: flex;
-      align-items: center;
-      gap: 32px;
-      margin: 24px 0;
-    }
-
-    .risk-circle {
-      position: relative;
-      width: 120px;
-      height: 120px;
-    }
-
-    .risk-value {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .risk-metrics {
-      flex: 1;
-    }
-
-    .metric {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border-light);
-    }
-
-    .metric:last-child {
-      border-bottom: none;
-    }
-
-    .metric-label {
-      font-weight: 500;
-      color: var(--text-primary);
-    }
-
-    .metric-value {
-      font-weight: 600;
-      color: var(--accent);
-    }
+    .risk-display { display: flex; align-items: center; gap: 32px; margin: 24px 0; }
+    .risk-circle { position: relative; width: 120px; height: 120px; }
+    .risk-value { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 1.5rem; font-weight: 700; color: var(--text-primary); }
+    .risk-metrics { flex: 1; }
+    .metric { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-light); }
+    .metric:last-child { border-bottom: none; }
+    .metric-label { font-weight: 500; color: var(--text-primary); }
+    .metric-value { font-weight: 600; color: var(--accent); }
 
     /* Tabs */
-    .tabs {
-      display: flex;
-      border-bottom: 1px solid var(--border-light);
-      margin-bottom: 24px;
-    }
-
-    .tab {
-      padding: 12px 24px;
-      border: none;
-      background: none;
-      color: var(--text-muted);
-      font-weight: 500;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: all 0.2s ease;
-    }
-
-    .tab.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-    }
-
-    .tab:hover {
-      color: var(--text-primary);
-    }
+    .tabs { display: flex; border-bottom: 1px solid var(--border-light); margin-bottom: 24px; }
+    .tab{ padding: 12px 24px; border: none; background: none; color: var(--text-muted); font-weight: 500;
+      cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s ease; }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab:hover { color: var(--text-primary); }
 
     /* Hidden */
-    .hidden {
-      display: none !important;
-    }
+    .hidden { display: none !important; }
 
     /* File input */
-    .file-input {
-      display: none;
-    }
+    .file-input { display: none; }
 
-    /* Utility Classes */
-    .flex {
-      display: flex;
-    }
+    /* Utilities */
+    .flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}
+    .gap-4{gap:16px}.mt-4{margin-top:16px}.mb-4{margin-bottom:16px}.font-mono{font-family:var(--font-mono)}
 
-    .items-center {
-      align-items: center;
-    }
-
-    .justify-between {
-      justify-content: space-between;
-    }
-
-    .gap-4 {
-      gap: 16px;
-    }
-
-    .mt-4 {
-      margin-top: 16px;
-    }
-
-    .mb-4 {
-      margin-bottom: 16px;
-    }
-
-    .font-mono {
-      font-family: var(--font-mono);
-    }
-
-    /* Responsive */
     @media (max-width: 768px) {
-      .container {
-        padding: 0 16px;
-      }
-      
-      .upload-zone {
-        padding: 32px 16px;
-      }
-      
-      .risk-display {
-        flex-direction: column;
-        text-align: center;
-      }
-      
-      .btn {
-        width: 100%;
-        justify-content: center;
-      }
+      .container { padding: 0 16px; }
+      .upload-zone { padding: 32px 16px; }
+      .risk-display { flex-direction: column; text-align: center; }
+      .btn { width: 100%; justify-content: center; }
     }
   </style>
 </head>
@@ -606,52 +226,45 @@
       <div class="card">
         <div class="card-header">
           <h2>Analyze Conversation Screenshots</h2>
-          <p class="text-sm">Upload 2-3 screenshots of text conversations to identify potential manipulation patterns</p>
+          <p class="text-sm">Upload 2–3 screenshots of text conversations to identify potential manipulation patterns.</p>
         </div>
-        
+
         <div class="card-body">
           <div class="upload-zone" id="dropzone" tabindex="0">
             <div class="upload-icon">📱</div>
             <div class="upload-text">Drop screenshots here or click to browse</div>
-            <div class="upload-hint">Supports JPG, PNG • Max 3 files • Images auto-deleted after analysis</div>
+            <div class="upload-hint">JPG, PNG • Max 3 • Images auto-deleted after analysis</div>
+
+            <!-- Hidden file input -->
             <input type="file" class="file-input" id="fileInput" accept="image/*" multiple>
-            <button class="btn btn-primary" id="chooseBtn">Choose Files</button>
+            <!-- Label = native trigger (works even if JS is flaky) -->
+            <label class="btn btn-primary" id="chooseBtn" for="fileInput">Choose Files</label>
           </div>
 
           <div id="progress" class="progress hidden">
             <div><strong>Processing your analysis...</strong></div>
             <div class="progress-steps">
-              <div class="progress-step" id="step-upload">
-                <span>📤</span> Upload
-              </div>
-              <div class="progress-step" id="step-analyze">
-                <span>🔍</span> Analyze
-              </div>
-              <div class="progress-step" id="step-report">
-                <span>📊</span> Generate Report
-              </div>
+              <div class="progress-step" id="step-upload"><span>📤</span> Upload</div>
+              <div class="progress-step" id="step-analyze"><span>🔍</span> Analyze</div>
+              <div class="progress-step" id="step-report"><span>📊</span> Generate Report</div>
             </div>
-            <div class="text-sm mt-4" id="progressText">Initializing...</div>
+            <div class="text-sm mt-4" id="progressText">Initializing…</div>
           </div>
 
           <div class="grid grid-2 mt-4">
             <div class="form-group">
               <label class="form-label" for="context">Additional Context (Optional)</label>
-              <textarea 
-                class="form-textarea" 
-                id="context" 
-                placeholder="Provide context about the relationship or situation that might help with analysis..."
-              ></textarea>
-              <div class="form-help">This helps our AI provide more accurate insights</div>
+              <textarea class="form-textarea" id="context" placeholder="Provide brief context that might help (e.g., 'Dad denies last night, flips blame')."></textarea>
+              <div class="form-help">This helps the AI sharpen the narrative.</div>
             </div>
-            
+
             <div class="form-group">
               <label class="form-label" for="method">Upload Method</label>
               <select class="form-select" id="method">
                 <option value="signed" selected>Automatic Upload (Recommended)</option>
                 <option value="manual">Manual CLI Upload</option>
               </select>
-              <div class="form-help">Use manual mode if automatic upload fails</div>
+              <div class="form-help">Use manual mode if automatic upload fails.</div>
             </div>
           </div>
 
@@ -661,8 +274,8 @@
               <div class="text-sm mb-4">If automatic upload fails, use these CLI commands:</div>
               <pre id="cliBlock" class="font-mono text-xs" style="background: var(--bg-tertiary); padding: 16px; border-radius: var(--radius-md); overflow-x: auto;"></pre>
               <div class="flex gap-4 mt-4">
-                <button class="btn btn-secondary btn-sm" id="copyCli">Copy Commands</button>
-                <button class="btn btn-primary btn-sm" id="confirmCli">I Ran Commands - Start Polling</button>
+                <button class="btn btn-secondary btn-sm" id="copyCli" type="button">Copy Commands</button>
+                <button class="btn btn-primary btn-sm" id="confirmCli" type="button">I Ran Commands — Start Polling</button>
               </div>
             </div>
           </details>
@@ -670,10 +283,8 @@
 
         <div class="card-footer">
           <div class="flex items-center justify-between">
-            <button class="btn btn-primary btn-lg" id="generateBtn">Generate Analysis Report</button>
-            <div class="text-sm">
-              Free plan: 1 report per session
-            </div>
+            <button class="btn btn-primary btn-lg" id="generateBtn" type="button">Generate Analysis Report</button>
+            <div class="text-sm">Free plan: 1 report per session</div>
           </div>
         </div>
       </div>
@@ -685,12 +296,12 @@
         <div class="card-header">
           <div class="flex items-center justify-between">
             <h2>Analysis Results</h2>
-            <button class="btn btn-danger btn-sm" id="deleteAll">Clear All Results</button>
+            <button class="btn btn-danger btn-sm" id="deleteAll" type="button">Clear All Results</button>
           </div>
         </div>
         <div class="card-body">
           <div id="results">
-            <div class="text-sm" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
+            <div class="text-sm" id="resultsPlaceholder" style="text-align:center;padding:48px 0;color:var(--text-muted);">
               No analyses yet. Upload screenshots above to get started.
             </div>
           </div>
@@ -710,14 +321,14 @@
           </div>
           <div class="result-status job-status">pending</div>
         </div>
-        <button class="btn btn-secondary btn-sm btn-delete">Delete</button>
+        <button class="btn btn-secondary btn-sm btn-delete" type="button">Delete</button>
       </div>
 
       <div class="card-body">
         <div class="tabs">
-          <button class="tab tab-sum active">Summary</button>
-          <button class="tab tab-det">Detailed Report</button>
-          <button class="tab tab-raw">Raw Data</button>
+          <button class="tab tab-sum active" type="button">Summary</button>
+          <button class="tab tab-det" type="button">Detailed Report</button>
+          <button class="tab tab-raw" type="button">Raw Data</button>
         </div>
 
         <!-- Summary View -->
@@ -725,25 +336,16 @@
           <div class="risk-display">
             <div class="ring-wrap"></div>
             <div class="risk-metrics">
-              <div class="metric">
-                <span class="metric-label">Analysis Confidence</span>
-                <span class="metric-value conf-val">—</span>
-              </div>
-              <div class="metric">
-                <span class="metric-label">Communication Balance</span>
-                <span class="metric-value cb-val">—</span>
-              </div>
-              <div class="metric">
-                <span class="metric-label">Emotional Stability</span>
-                <span class="metric-value es-val">—</span>
-              </div>
+              <div class="metric"><span class="metric-label">Analysis Confidence</span><span class="metric-value conf-val">—</span></div>
+              <div class="metric"><span class="metric-label">Communication Balance</span><span class="metric-value cb-val">—</span></div>
+              <div class="metric"><span class="metric-label">Emotional Stability</span><span class="metric-value es-val">—</span></div>
             </div>
           </div>
 
           <div class="tactic-chips mt-4"></div>
 
           <details class="mt-4">
-            <summary class="btn btn-secondary btn-sm">View Evidence Quotes</summary>
+            <summary class="btn btn-secondary btn-sm" type="button">View Evidence Quotes</summary>
             <ul class="receipts-list mt-4"></ul>
           </details>
         </div>
@@ -751,33 +353,32 @@
         <!-- Detailed View -->
         <div class="det-view hidden">
           <div class="flex gap-4 mb-4">
-            <button class="btn btn-secondary btn-sm btn-copy">Copy Report</button>
-            <button class="btn btn-secondary btn-sm btn-dl">Download .txt</button>
+            <button class="btn btn-secondary btn-sm btn-copy" type="button">Copy Report</button>
+            <button class="btn btn-secondary btn-sm btn-dl" type="button">Download .txt</button>
           </div>
           <div class="narrative"></div>
         </div>
 
         <!-- Raw Data View -->
         <div class="raw-view hidden">
-          <pre class="raw-json font-mono text-xs" style="background: var(--bg-tertiary); padding: 16px; border-radius: var(--radius-md); overflow-x: auto; white-space: pre-wrap;"></pre>
+          <pre class="raw-json font-mono text-xs" style="background:var(--bg-tertiary);padding:16px;border-radius:var(--radius-md);overflow-x:auto;white-space:pre-wrap;"></pre>
         </div>
       </div>
     </div>
   </template>
 
   <script>
-    // Configuration
+    // --- Config ---
     const DEFAULT_API = "https://toxella-api-yhopcbvaia-uc.a.run.app";
     const API_BASE = new URLSearchParams(location.search).get("api") || DEFAULT_API;
     const BUCKET = "toxella-id-uploads";
     const FREE_MAX_JOBS = 1, MAX_FILES = 3;
 
-    // DOM Elements
+    // --- Elements ---
     const $status = document.querySelector('.status-indicator span');
     const $api = document.getElementById('apiBaseLabel');
     const $dz = document.getElementById('dropzone');
     const $fileInput = document.getElementById('fileInput');
-    const $chooseBtn = document.getElementById('chooseBtn');
     const $method = document.getElementById('method');
     const $context = document.getElementById('context');
     const $advanced = document.getElementById('advanced');
@@ -788,285 +389,220 @@
     const $progress = document.getElementById('progress');
     const $progressText = document.getElementById('progressText');
     const $results = document.getElementById('results');
+    const $placeholder = document.getElementById('resultsPlaceholder');
     const $deleteAll = document.getElementById('deleteAll');
     const resultTpl = document.getElementById('resultTpl');
 
     let jobs = [], jobsCount = 0, files = [];
 
-    // Initialize
-    document.getElementById('apiBaseLabel').textContent = API_BASE;
-    
-    // Set up event listeners immediately
-    $chooseBtn.addEventListener('click', () => $fileInput.click());
-    $fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
-    
-    // Set up drag and drop
-    $dz.addEventListener('click', () => $fileInput.click());
-    
-    $dz.addEventListener('dragenter', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      $dz.classList.add('drag-over');
+    // --- Init ---
+    $api.textContent = API_BASE;
+
+    // Native label handles open. Keep JS fallback for clicking dropzone.
+    $dz.addEventListener('click', (e) => {
+      const isLabel = e.target && (e.target.tagName === 'LABEL' || e.target.closest('label'));
+      if (!isLabel) $fileInput.click();
     });
-    
-    $dz.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      $dz.classList.add('drag-over');
-    });
-    
-    $dz.addEventListener('dragleave', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      $dz.classList.remove('drag-over');
-    });
-    
-    $dz.addEventListener('drop', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      $dz.classList.remove('drag-over');
-      handleFiles(e.dataTransfer.files);
-    });
-    
-    // File handling
-    const handleFiles = (list) => {
+
+    // Drag & drop
+    ['dragenter','dragover'].forEach(ev =>
+      $dz.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); $dz.classList.add('drag-over'); })
+    );
+    ['dragleave','drop'].forEach(ev =>
+      $dz.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); $dz.classList.remove('drag-over'); })
+    );
+    $dz.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+
+    // File input change
+    $fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+    // --- File handling ---
+    function handleFiles(list) {
       files = Array.from(list || []).slice(0, MAX_FILES);
       updateStatus(`${files.length} file(s) selected`);
       if ($advanced.open) renderCLI();
-    };
+    }
+    function updateStatus(message){ $status.textContent = message; }
 
-    const updateStatus = (message) => {
-      $status.textContent = message;
-    };
-
-    const updateProgress = (step, message) => {
+    function updateProgress(step, message){
       $progressText.textContent = message;
-      // Update step indicators
-      const steps = ['upload', 'analyze', 'report'];
+      const steps = ['upload','analyze','report'];
       const currentIndex = steps.indexOf(step);
-      
       steps.forEach((s, i) => {
         const el = document.getElementById(`step-${s}`);
-        el.classList.remove('active', 'complete');
+        el.classList.remove('active','complete');
+        if (currentIndex === -1) return;
         if (i < currentIndex) el.classList.add('complete');
         else if (i === currentIndex) el.classList.add('active');
       });
-    };
+    }
 
-    // Event listeners
-    $chooseBtn.onclick = () => $fileInput.click();
-    $fileInput.onchange = (e) => handleFiles(e.target.files);
+    // --- CLI fallback ---
+    function renderCLI(){
+      if (!files.length){ $cliBlock.textContent = '# Select files first'; return; }
+      const D='$';
+      const names = files.map(f=>`"${f.name}"`).join(' ');
+      const fileJsons = files.map((f,i)=>`{"path":"uploads/${D}JOB_ID/${i}.jpg"}`).join(',');
+      $cliBlock.textContent =
+`# macOS/Linux
+API="${API_BASE}"
+BUCKET="${BUCKET}"
+JOB_ID="$(uuidgen 2>/dev/null || python3 -c 'import uuid;print(uuid.uuid4())')"
+echo "JOB_ID=${D}JOB_ID"
 
-    // Drag and drop
-    ['dragenter', 'dragover'].forEach(ev => 
-      $dz.addEventListener(ev, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        $dz.classList.add('drag-over');
-      })
-    );
+i=0; for f in ${names}; do
+  gsutil cp "\${f}" "gs://${D}BUCKET/uploads/${D}JOB_ID/${D}i.jpg"; i=$((i+1));
+done
 
-    ['dragleave', 'drop'].forEach(ev => 
-      $dz.addEventListener(ev, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        $dz.classList.remove('drag-over');
-      })
-    );
+curl -sS -X POST "${D}API/jobs" -H "Content-Type: application/json" -d '{
+  "jobId":"'"${D}JOB_ID"'",
+  "plan":"free",
+  "files":[${fileJsons}],
+  "instructions": ${JSON.stringify(JSON.stringify(($context.value||'').trim()))}
+}'
 
-    $dz.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files));
-    $dz.addEventListener('click', () => $fileInput.click());
+watch -n 3 curl -sS "${D}API/jobs/${D}JOB_ID"
 
-    // Main generation function
-    $generate.onclick = async () => {
-      try {
-        if (jobsCount >= FREE_MAX_JOBS) {
-          updateStatus('Free plan limit reached. Delete results to create new analysis.');
-          return;
-        }
+# Windows PowerShell
+${D}Api="${API_BASE}"
+${D}Bucket="${BUCKET}"
+${D}JOB_ID=[guid]::NewGuid().Guid
+"JOB_ID=${D}JOB_ID"
+${files.map((f,i)=>`gsutil cp "${f.name}" "gs://${D}Bucket/uploads/${D}JOB_ID/${i}.jpg"`).join('\n')}
+${D}JobJson=@"
+{ "jobId":"${D}JOB_ID","plan":"free",
+  "files":[${fileJsons}],
+  "instructions": ${JSON.stringify(($context.value||'').trim())}
+}
+"@
+Invoke-RestMethod -Method POST -Uri "${D}Api/jobs" -ContentType "application/json" -Body ${D}JobJson
+while(${D}true){ curl "${D}Api/jobs/${D}JOB_ID"; Start-Sleep 3 }`;
+    }
+    $advanced.addEventListener('toggle', ()=>{ if ($advanced.open) renderCLI(); });
+    $copyCli.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText($cliBlock.textContent); updateStatus('CLI copied'); }catch{ updateStatus('Copy failed'); } });
+    $confirmCli.addEventListener('click', ()=>{ const id = prompt('Paste the JOB_ID printed in your terminal:'); if (id) addResultCard(id); });
 
-        if (files.length < 2) {
-          updateStatus('Please select at least 2 screenshots');
-          return;
-        }
-
-        if (files.length > MAX_FILES) {
-          updateStatus(`Maximum ${MAX_FILES} files allowed`);
-          return;
-        }
+    // --- Generate flow ---
+    $generate.addEventListener('click', async ()=>{
+      try{
+        if (jobsCount >= FREE_MAX_JOBS) return updateStatus('Free plan limit reached. Delete results to run again.');
+        if (files.length < 2) return updateStatus('Please select at least 2 screenshots.');
+        if (files.length > MAX_FILES) return updateStatus(`Maximum ${MAX_FILES} files allowed.`);
 
         $progress.classList.remove('hidden');
         $generate.disabled = true;
 
-        // Automatic upload flow
-        updateProgress('Requesting upload permissions...');
-        
-        const uploadResponse = await fetch(`${API_BASE}/signed-urls`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plan: 'free', count: files.length })
+        // Signed URLs
+        updateProgress('upload','Requesting upload slots…');
+        const req = await fetch(`${API_BASE}/signed-urls`, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ plan:'free', count: files.length })
         });
+        const up = await req.json();
+        if (!req.ok) throw new Error(up.error || 'Upload request failed');
+        const { jobId, urls=[] } = up;
+        if (!jobId || urls.length < files.length) throw new Error('Server did not provide enough upload slots');
 
-        const uploadData = await uploadResponse.json();
-        if (!uploadResponse.ok) throw new Error(uploadData.error || 'Upload request failed');
-
-        const { jobId, urls = [] } = uploadData;
-        if (!jobId || urls.length < files.length) {
-          throw new Error('Server did not provide enough upload slots');
+        // Upload
+        updateProgress('upload','Uploading screenshots…');
+        const metas=[];
+        for (let i=0;i<files.length;i++){
+          const f = files[i], u = urls[i];
+          const ct = u.contentType || f.type || 'application/octet-stream';
+          const put = await fetch(u.uploadUrl, { method:'PUT', headers:{'Content-Type':ct}, body:f });
+          if (!put.ok) throw new Error(`Upload failed for ${f.name} (${put.status})`);
+          metas.push({ path:u.path, size:f.size, mime:f.type || ct });
         }
 
-        updateProgress('Uploading screenshots...');
-        
-        const fileMetas = [];
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          const url = urls[i];
-          const contentType = url.contentType || file.type || 'application/octet-stream';
-          
-          const uploadResult = await fetch(url.uploadUrl, {
-            method: 'PUT',
-            headers: { 'Content-Type': contentType },
-            body: file
-          });
-
-          if (!uploadResult.ok) {
-            throw new Error(`Upload failed for ${file.name} (${uploadResult.status})`);
-          }
-
-          fileMetas.push({
-            path: url.path,
-            size: file.size,
-            mime: file.type || contentType
-          });
-        }
-
-        updateProgress('Creating analysis job...');
-        
-        const instructions = ($context.value || '').trim();
-        const jobResponse = await fetch(`${API_BASE}/jobs`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            jobId,
-            plan: 'free',
-            files: fileMetas,
-            ...(instructions ? { instructions } : {})
-          })
+        // Create job
+        updateProgress('analyze','Creating analysis job…');
+        const instructions = ($context.value||'').trim();
+        const cr = await fetch(`${API_BASE}/jobs`, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ jobId, plan:'free', files: metas, ...(instructions?{instructions}:{}) })
         });
+        const cj = await cr.json();
+        if (!cr.ok) throw new Error(cj.error || 'Job creation failed');
 
-        const jobData = await jobResponse.json();
-        if (!jobResponse.ok) throw new Error(jobData.error || 'Job creation failed');
-
-        updateProgress('Analysis in progress...');
+        // Poll
+        updateProgress('report','Analysis in progress…');
         addResultCard(jobId);
         jobsCount++;
         updateStatus('Analysis started successfully');
-
-      } catch (error) {
-        console.error('Generation error:', error);
-        updateStatus(error.message || 'Something went wrong');
+      }catch(err){
+        console.error(err);
+        updateStatus(err.message || 'Something went wrong');
         $progress.classList.add('hidden');
         $generate.disabled = false;
       }
-    };
+    });
 
-    // Add missing result card and other functions
-    function addResultCard(jobId) {
+    // --- Results / polling ---
+    function addResultCard(jobId){
       const frag = resultTpl.content.cloneNode(true);
       const el = frag.children[0];
       const $statusEl = el.querySelector('.job-status');
       const $btnDel = el.querySelector('.btn-delete');
-      const $tabSum = el.querySelector('.tab-sum');
-      const $tabDet = el.querySelector('.tab-det');
-      const $tabRaw = el.querySelector('.tab');
-      const $sum = el.querySelector('.sum-view');
-      const $det = el.querySelector('.det-view');
-      const $raw = el.querySelector('.raw-view');
+      const tabs = el.querySelectorAll('.tab');
+      const views = [el.querySelector('.sum-view'), el.querySelector('.det-view'), el.querySelector('.raw-view')];
       const $rawJson = el.querySelector('.raw-json');
+      const $ring = el.querySelector('.ring-wrap');
 
       el.querySelector('.job-id').textContent = jobId;
 
-      // Tab switching
-      const tabs = el.querySelectorAll('.tab');
-      const views = [el.querySelector('.sum-view'), el.querySelector('.det-view'), el.querySelector('.raw-view')];
-      
-      tabs.forEach((tab, index) => {
-        tab.onclick = () => {
-          tabs.forEach(t => t.classList.remove('active'));
-          views.forEach(v => v.classList.add('hidden'));
-          tab.classList.add('active');
-          views[index].classList.remove('hidden');
-        };
+      // Tabs
+      tabs.forEach((tab, idx)=>{
+        tab.addEventListener('click', ()=>{
+          tabs.forEach(t=>t.classList.remove('active')); views.forEach(v=>v.classList.add('hidden'));
+          tab.classList.add('active'); views[idx].classList.remove('hidden');
+        });
       });
 
-      $btnDel.onclick = async () => {
-        try { 
-          await fetch(`${API_BASE}/jobs/${encodeURIComponent(jobId)}`, {method: 'DELETE'}); 
-        } catch(e) {}
-        el.remove();
-        jobs = jobs.filter(j => j.id !== jobId);
-        updateStatus('Job deleted');
-      };
+      // Delete
+      $btnDel.addEventListener('click', async ()=>{
+        try{ await fetch(`${API_BASE}/jobs/${encodeURIComponent(jobId)}`, { method:'DELETE' }); }catch{}
+        el.remove(); jobs = jobs.filter(j=>j.id!==jobId); updateStatus('Job deleted');
+      });
 
-      $results.querySelector('.text-sm').style.display = 'none';
-      $results.appendChild(el);
+      if ($placeholder) $placeholder.style.display = 'none';
+      $results.prepend(el);
 
-      // Polling function
-      async function poll() {
-        try {
-          const response = await fetch(`${API_BASE}/jobs/${encodeURIComponent(jobId)}`, { cache: 'no-store' });
-          const job = await response.json();
-          
-          const status = (job.status || '').toLowerCase();
-          $statusEl.textContent = status || 'unknown';
-          $statusEl.className = `result-status status-${status.includes('complete') ? 'complete' : status.includes('error') ? 'error' : 'processing'}`;
+      // Poll
+      async function poll(){
+        try{
+          const jr = await fetch(`${API_BASE}/jobs/${encodeURIComponent(jobId)}`, { cache:'no-store' });
+          const j = await jr.json();
+          const st = (j.status||'').toLowerCase();
+          $statusEl.textContent = st || 'unknown';
+          $statusEl.className = `result-status status-${st.includes('complete')?'complete': st.includes('error')?'error':'processing'}`;
 
-          if (job.reportId) {
-            const reportResponse = await fetch(`${API_BASE}/reports/${encodeURIComponent(job.reportId)}`, { cache: 'no-store' });
-            const report = await reportResponse.json();
-            
-            $rawJson.textContent = JSON.stringify(report, null, 2);
-            
-            // Update summary view with report data
-            const score = Math.round(report.risk_score ?? report.analysis?.risk_score ?? 0);
-            const ringWrap = el.querySelector('.ring-wrap');
-            ringWrap.innerHTML = riskRingSVG(score);
-            
-            // Update metrics
-            const conf = report.confidence ?? report.analysis?.confidence ?? null;
+          if (j.reportId){
+            const rr = await fetch(`${API_BASE}/reports/${encodeURIComponent(j.reportId)}`, { cache:'no-store' });
+            const rep = await rr.json();
+            $rawJson.textContent = JSON.stringify(rep, null, 2);
+
+            // Simple summary bits
+            const score = Math.round(rep.risk_score ?? rep.analysis?.risk_score ?? 0);
+            $ring.innerHTML = riskRingSVG(score);
+            const conf = rep.confidence ?? rep.analysis?.confidence ?? null;
             el.querySelector('.conf-val').textContent = (typeof conf === 'number') ? `${Math.round(conf*100)}%` : '—';
-            
-            $progress.classList.add('hidden');
-            $generate.disabled = false;
-            updateStatus('Analysis complete');
+
+            $progress.classList.add('hidden'); $generate.disabled = false; updateStatus('Analysis complete');
             return;
           }
-
-          if (status.includes('error')) {
-            $progress.classList.add('hidden');
-            $generate.disabled = false;
-            updateStatus('Analysis failed');
-            return;
-          }
-
-        } catch(e) {
-          console.error('Polling error:', e);
-        }
-        
-        setTimeout(poll, 3000);
+          if (st.includes('error')) { $progress.classList.add('hidden'); $generate.disabled = false; updateStatus('Analysis failed'); return; }
+        }catch(e){ /* ignore transient */ }
+        setTimeout(poll, 2500);
       }
-
       poll();
+
       jobs.push({ id: jobId, el });
     }
 
-    function riskRingSVG(score) {
-      const pct = Math.max(0, Math.min(100, Math.round(score || 0)));
-      const r = 45, c = 2 * Math.PI * r, dash = (pct / 100) * c;
-      let color = '#38a169'; // success
-      if (pct >= 67) color = '#e53e3e'; // danger
-      else if (pct >= 34) color = '#ed8936'; // warning
-      
+    function riskRingSVG(score){
+      const pct = Math.max(0, Math.min(100, Math.round(score||0)));
+      const r=45, c=2*Math.PI*r, dash=(pct/100)*c;
+      let color='#38a169'; if (pct>=67) color='#e53e3e'; else if (pct>=34) color='#ed8936';
       return `
         <svg class="risk-circle" viewBox="0 0 120 120" role="img" aria-label="Risk ${pct}/100">
           <circle cx="60" cy="60" r="${r}" stroke="#e2e8f0" stroke-width="8" fill="none"/>
@@ -1076,15 +612,12 @@
         </svg>`;
     }
 
-    // Delete all functionality
-    $deleteAll.onclick = async () => {
-      for (const job of jobs) {
-        try {
-          await fetch(`${API_BASE}/jobs/${encodeURIComponent(job.id)}`, { method: 'DELETE' });
-        } catch(e) {}
-      }
-      $results.innerHTML = '<div class="text-sm" style="text-align: center; padding: 48px 0; color: var(--text-muted);">No analyses yet. Upload screenshots above to get started.</div>';
-      jobs = [];
-      jobsCount = 0;
-      updateStatus('All results cleared');
-    };
+    // Delete all
+    $deleteAll.addEventListener('click', async ()=>{
+      for (const job of jobs){ try{ await fetch(`${API_BASE}/jobs/${encodeURIComponent(job.id)}`, { method:'DELETE' }); }catch{} }
+      $results.innerHTML = '<div class="text-sm" id="resultsPlaceholder" style="text-align:center;padding:48px 0;color:var(--text-muted);">No analyses yet. Upload screenshots above to get started.</div>';
+      jobs=[]; jobsCount=0; updateStatus('All results cleared');
+    });
+  </script>
+</body>
+</html>
