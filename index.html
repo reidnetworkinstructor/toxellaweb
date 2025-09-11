@@ -6,389 +6,425 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Analyze conversation screenshots for manipulation patterns with AI-powered insights." />
   <style>
-    /* ============ Design System ============ */
+    /* ===================== Design System (lightweight, no external libs) ===================== */
     :root{
-      --bg-primary:#fafbfc; --bg-secondary:#fff; --bg-tertiary:#f5f7fa; --bg-accent:#f0f4ff;
-      --text-primary:#1a1d29; --text-secondary:#4a5568; --text-muted:#718096; --text-inverse:#fff;
-      --border-light:#e2e8f0; --border-medium:#cbd5e0; --border-focus:#4299e1;
-      --accent:#4299e1; --accent-dark:#2b6cb0; --success:#38a169; --warning:#ed8936; --danger:#e53e3e;
-      --shadow-sm:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
-      --shadow-md:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06);
-      --radius-md:10px; --radius-lg:14px;
-      --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-      --font-mono:ui-monospace,SFMono-Regular,"SF Mono",Consolas,"Liberation Mono",Menlo,monospace;
+      --bg:#f7f9fc; --panel:#ffffff; --ink:#101828; --muted:#667085; --subtle:#98a2b3;
+      --line:#e5e7eb; --line-2:#d0d5dd;
+      --acc:#3b82f6; --acc-2:#1d4ed8;
+      --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444;
+      --chip:#f2f4f7; --ring:#e5e7eb;
+      --shadow:0 2px 12px rgba(16,24,40,.06);
+      --r-sm:10px; --r-lg:16px;
+      --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      --sans:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
     }
     *{box-sizing:border-box}
-    html,body{margin:0;padding:0;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-sans);line-height:1.6}
-    .container{max-width:1200px;margin:0 auto;padding:0 24px}
-    .section{margin:32px 0}
-    .card{background:var(--bg-secondary);border:1px solid var(--border-light);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden}
-    .card-header{padding:24px 24px 0}
-    .card-body{padding:24px}
-    .card-footer{padding:0 24px 24px;border-top:1px solid var(--border-light);margin-top:24px;padding-top:24px}
-    h1{margin:0;font-size:2.4rem;font-weight:800;letter-spacing:-.02em;background:linear-gradient(135deg,var(--accent),var(--accent-dark));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    h2{margin:0 0 12px;font-size:1.45rem}
-    .text-sm{font-size:.9rem;color:var(--text-muted)} .text-xs{font-size:.78rem;color:var(--text-muted)}
-    .header{background:linear-gradient(135deg,var(--bg-secondary),var(--bg-accent));border-bottom:1px solid var(--border-light);padding:28px 0}
-    .header-content{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6}
+    .container{max-width:1100px;margin:0 auto;padding:0 20px}
+    h1{font-size:2.2rem;margin:0;background:linear-gradient(135deg,var(--acc),var(--acc-2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;letter-spacing:-.02em}
+    h2{font-size:1.4rem;margin:0 0 8px}
+    .text-sm{font-size:.92rem;color:var(--muted)} .text-xs{font-size:.8rem;color:var(--subtle)}
+    .header{background:linear-gradient(180deg,#fff, #f8fbff);border-bottom:1px solid var(--line)}
+    .header-content{display:flex;align-items:center;justify-content:space-between;padding:22px 0;gap:12px;flex-wrap:wrap}
     .brand{display:flex;align-items:center;gap:12px}
-    .brand-icon{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px}
-    .status-indicator{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fff;border:1px solid var(--border-light);border-radius:10px}
-    .status-dot{width:8px;height:8px;border-radius:50%;background:var(--success)}
+    .logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--acc),var(--acc-2));color:#fff;display:grid;place-items:center;font-size:22px;box-shadow:var(--shadow)}
+    .ready{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fff;border:1px solid var(--line);border-radius:10px}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
 
-    /* Upload zone */
-    .upload-zone{border:2px dashed var(--border-medium);border-radius:16px;padding:42px 20px;text-align:center;background:var(--bg-tertiary);cursor:pointer;transition:.2s}
-    .upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:var(--bg-accent);transform:translateY(-2px)}
-    .upload-icon{width:64px;height:64px;margin:0 auto 12px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px}
-    .file-input{display:none}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden;margin:28px 0}
+    .card-h{padding:22px 22px 0}
+    .card-b{padding:22px}
+    .card-f{padding:12px 22px 22px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 
-    /* Forms & buttons */
-    .form-group{margin:18px 0}
-    .form-label{display:block;font-weight:600;margin-bottom:8px}
-    .form-textarea,.form-select{width:100%;padding:12px 14px;border:1px solid var(--border-medium);border-radius:10px;background:#fff}
-    .form-textarea:focus,.form-select:focus{outline:none;border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(66,153,225,.12)}
-    .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border:1px solid transparent;border-radius:10px;font-weight:600;background:#fff;cursor:pointer}
-    .btn-primary{background:var(--accent);color:#fff}
-    .btn-primary:hover{background:var(--accent-dark);box-shadow:var(--shadow-md);transform:translateY(-1px)}
-    .btn-secondary{border-color:var(--border-medium)}
-    .btn-danger{background:var(--danger);color:#fff}
-    .btn-lg{padding:16px 28px}
-    .btn-sm{padding:8px 14px;font-size:.9rem}
+    /* ---------- Upload zone & gallery ---------- */
+    .drop{border:2px dashed var(--line-2);border-radius:16px;background:#f8fafc;padding:36px;text-align:center;cursor:pointer;transition:.15s}
+    .drop:hover,.drop.drag{border-color:var(--acc);background:#eef5ff;transform:translateY(-1px)}
+    .drop .icon{width:58px;height:58px;border-radius:50%;background:var(--acc);color:#fff;display:grid;place-items:center;margin:0 auto 10px;font-size:22px}
 
-    /* Progress */
-    .progress{margin:16px 0;padding:16px;background:var(--bg-accent);border:1px solid var(--border-light);border-radius:12px}
-    .steps{display:flex;gap:16px;margin-top:10px}
-    .step{color:var(--text-muted)} .step.active{color:var(--accent)} .step.done{color:var(--success)}
+    .gallery{margin-top:16px;display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+    .file{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff}
+    .thumb{width:56px;height:56px;border-radius:10px;background:#f2f4f7;border:1px solid var(--line);overflow:hidden;display:grid;place-items:center;font-size:18px;color:var(--muted)}
+    .thumb img{display:block;max-width:100%;max-height:100%}
+    .meta{flex:1;min-width:0}
+    .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+    .stat{font-size:.82rem;color:var(--muted)}
 
-    /* Results list */
-    .result-card{background:#fff;border:1px solid var(--border-light);border-radius:16px;margin-bottom:20px;box-shadow:var(--shadow-sm);overflow:hidden}
-    .result-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border-light);background:var(--bg-tertiary)}
-    .result-status{padding:4px 10px;border-radius:999px;font-size:.75rem;font-weight:700;letter-spacing:.04em}
-    .status-complete{background:#d1fae5;color:#065f46}
-    .status-processing{background:#e6fffa;color:#065f46}
-    .status-error{background:#fee2e2;color:#991b1b}
+    /* ---------- Buttons & inputs ---------- */
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:600}
+    .btn:hover{box-shadow:var(--shadow)}
+    .primary{background:var(--acc);color:#fff;border-color:transparent}
+    .primary:hover{background:var(--acc-2)}
+    .danger{background:var(--bad);color:#fff;border-color:transparent}
+    .btn-sm{padding:8px 12px;font-size:.92rem}
+    .input, .textarea{width:100%;padding:12px 14px;border:1px solid var(--line-2);border-radius:10px;background:#fff}
+    .textarea:focus,.input:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+    label{font-weight:600;display:block;margin:10px 0 6px}
 
-    /* Tabs */
-    .tabs{display:flex;border-bottom:1px solid var(--border-light);gap:8px;margin-bottom:16px}
-    .tab{padding:10px 16px;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--text-muted);font-weight:600}
-    .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+    /* ---------- Steps ---------- */
+    .steps{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px}
+    .step{color:var(--subtle)}
+    .step.active{color:var(--acc)} .step.done{color:var(--ok)}
 
-    /* Risk ring */
-    .risk-display{display:flex;gap:28px;align-items:center;margin:18px 0}
-    .risk-circle{position:relative;width:120px;height:120px}
-    .risk-value{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800}
+    /* ---------- Tabs & result card ---------- */
+    .tabs{display:flex;gap:8px;border-bottom:1px solid var(--line);margin-bottom:12px}
+    .tab{padding:10px 14px;background:none;border:none;border-bottom:2px solid transparent;font-weight:700;color:var(--muted);cursor:pointer}
+    .tab.active{border-bottom-color:var(--acc);color:var(--acc)}
+    .result{background:#fff;border:1px solid var(--line);border-radius:16px;margin:16px 0;overflow:hidden}
+    .result-h{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line);background:#f8fafc}
+    .badge{padding:4px 10px;border-radius:999px;font-size:.75rem;font-weight:700;letter-spacing:.04em}
+    .ok{background:#dcfce7;color:#14532d} .warn{background:#fff7ed;color:#9a3412} .proc{background:#eff6ff;color:#1d4ed8}
 
-    .metric{display:flex;justify-content:space-between;border-bottom:1px solid var(--border-light);padding:12px 0}
+    /* ---------- Summary layout ---------- */
+    .risk{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+    .ring{position:relative;width:120px;height:120px}
+    .ring .val{position:absolute;inset:0;display:grid;place-items:center;font-size:1.5rem;font-weight:800}
+    .metrics{flex:1;min-width:240px}
+    .metric{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:10px 0}
     .metric:last-child{border-bottom:none}
-    .metric-label{font-weight:600}
-    .metric-value{font-weight:700;color:var(--accent)}
+    .metric .v{font-weight:800;color:var(--acc)}
 
-    /* Tactic chips */
-    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-    .chip{border:1px solid var(--border-light);border-radius:999px;padding:6px 10px;background:#f8fafc;font-size:.85rem}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+    .chip{border:1px solid var(--line);background:var(--chip);border-radius:999px;padding:6px 10px;font-size:.86rem}
+    .compact{display:grid;gap:10px}
 
-    /* Narrative & spectrum */
-    .block{margin:14px 0}
-    .spectrum{margin-top:8px}
-    .srow{display:flex;align-items:center;gap:10px;margin:8px 0}
-    .srow .lbl{width:200px;min-width:140px;font-weight:700}
-    .meter{position:relative;flex:1;height:12px;background:#eef2f7;border:1px solid var(--border-light);border-radius:999px;overflow:hidden}
-    .meter .fill{position:absolute;left:0;top:0;bottom:0;background:#4299e133}
-    .meter .caret{position:absolute;top:-4px;width:2px;height:20px;background:#2b6cb0}
-    .scale{display:flex;justify-content:space-between;font-size:.75rem;color:var(--text-muted);margin-top:4px}
+    /* ---------- Spectrum bars ---------- */
+    .srow{display:flex;gap:10px;align-items:center;margin:8px 0}
+    .srow .lbl{width:210px;min-width:150px;font-weight:700}
+    .meter{position:relative;flex:1;height:12px;background:#eef2f7;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+    .fill{position:absolute;left:0;top:0;bottom:0;background:#3b82f633}
+    .caret{position:absolute;top:-4px;width:2px;height:20px;background:#1d4ed8}
+    .scale{display:flex;justify-content:space-between;font-size:.78rem;color:var(--subtle);margin-top:4px}
 
-    @media (max-width:760px){
-      .header-content{flex-direction:column;text-align:center}
-      .srow .lbl{width:140px}
-      .btn{width:100%;justify-content:center}
-      .risk-display{flex-direction:column;text-align:center}
-    }
+    /* ---------- Raw JSON ---------- */
+    pre{white-space:pre-wrap;background:#f3f6fb;border:1px solid var(--line);border-radius:12px;padding:12px;font-family:var(--mono);font-size:.86rem}
+
+    .row{display:grid;gap:16px;grid-template-columns:1fr 1fr}
+    @media (max-width:820px){ .row{grid-template-columns:1fr} .srow .lbl{width:150px} .btn{width:100%;justify-content:center}}
   </style>
 </head>
 <body>
-  <!-- ============ Header ============ -->
+  <!-- ===================== Header ===================== -->
   <header class="header">
-    <div class="container">
-      <div class="header-content">
-        <div class="brand">
-          <div class="brand-icon">⚗️</div>
-          <div>
-            <h1>Toxella</h1>
-            <div class="text-sm">Communication Analysis Platform</div>
-          </div>
+    <div class="container header-content">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">⚗️</div>
+        <div>
+          <h1>Toxella</h1>
+          <div class="text-sm">Communication Analysis — Soft-launch MVP</div>
         </div>
-        <div class="status-indicator">
-          <div class="status-dot"></div>
-          <span id="statusText">System Ready</span>
-          <span class="text-xs" id="apiBaseLabel" style="margin-left:10px"></span>
-        </div>
+      </div>
+      <div class="ready" aria-live="polite">
+        <span class="dot" aria-hidden="true"></span>
+        <span id="statusText">System Ready</span>
+        <span class="text-xs" id="apiBaseLabel" style="margin-left:8px"></span>
       </div>
     </div>
   </header>
 
-  <!-- ============ Main ============ -->
-  <main class="container">
-    <!-- Uploader -->
-    <section class="section">
-      <div class="card">
-        <div class="card-header">
-          <h2>Analyze Conversation Screenshots</h2>
-          <p class="text-sm">Upload 2–3 screenshots (JPG/PNG). Files auto-delete after analysis.</p>
+  <main class="container" id="app">
+    <!-- ===================== Uploader (signed URLs only) ===================== -->
+    <section class="card" aria-labelledby="upl-title">
+      <div class="card-h">
+        <h2 id="upl-title">Analyze Conversation Screenshots</h2>
+        <p class="text-sm">Upload up to <strong>3</strong> images (JPG/PNG). Free plan: <strong>one</strong> report per session.</p>
+      </div>
+      <div class="card-b">
+        <div id="dropzone" class="drop" tabindex="0" role="button" aria-label="Upload screenshots (drop or click)">
+          <div class="icon">📱</div>
+          <div><strong>Drop screenshots</strong> here or click to browse</div>
+          <div class="text-xs" style="margin-top:6px">We generate short-lived, v4 signed URLs and upload directly to secure storage.</div>
+          <input id="fileInput" type="file" accept="image/*" multiple hidden>
         </div>
-        <div class="card-body">
-          <div class="upload-zone" id="dropzone" tabindex="0" aria-label="Upload screenshots">
-            <div class="upload-icon">📱</div>
-            <div>Drop screenshots here or click to browse</div>
-            <div class="text-sm" style="margin-bottom:12px">Max 3 files • Free plan: 1 report/session</div>
-            <input id="fileInput" class="file-input" type="file" accept="image/*" multiple>
-            <label for="fileInput" class="btn btn-primary" id="chooseBtn">Choose Files</label>
-          </div>
 
-          <div id="progress" class="progress" style="display:none">
-            <div><strong>Working…</strong> <span id="progressText" class="text-sm">Initializing</span></div>
-            <div class="steps">
-              <div id="step-upload" class="step">📤 Upload</div>
-              <div id="step-analyze" class="step">🔍 Analyze</div>
-              <div id="step-report" class="step">📊 Report</div>
-            </div>
-          </div>
+        <!-- File gallery -->
+        <div id="gallery" class="gallery" aria-live="polite" aria-relevant="additions text"></div>
 
-          <div class="grid" style="display:grid;gap:18px;grid-template-columns:1fr 1fr">
-            <div class="form-group">
-              <label class="form-label" for="context">Additional Context (optional)</label>
-              <textarea id="context" class="form-textarea" placeholder="E.g., 'Dad denies late-night call, flips blame, says I’m crazy.'"></textarea>
-              <div class="text-sm">Helps sharpen the narrative.</div>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="method">Upload method</label>
-              <select id="method" class="form-select">
-                <option value="signed" selected>Automatic (recommended)</option>
-                <option value="manual">Manual (CLI)</option>
-              </select>
-              <div class="text-sm">Use manual if automatic upload fails.</div>
+        <!-- Context -->
+        <div class="row" style="margin-top:12px">
+          <div>
+            <label for="context">Optional context</label>
+            <textarea id="context" class="textarea" rows="3" placeholder="E.g., “He denies the midnight call, flips blame, calls me crazy.” Helps sharpen the narrative."></textarea>
+          </div>
+          <div>
+            <label for="plan">Plan</label>
+            <input id="plan" class="input" value="free" aria-readonly="true" readonly>
+            <div class="text-xs" style="margin-top:6px">
+              <!-- TODO: Replace with a real upsell when Stripe is wired -->
+              Want unlimited reports? <a href="#" aria-disabled="true" title="Coming soon">Pro (coming soon)</a>
             </div>
           </div>
-
-          <details id="advanced" style="margin-top:10px">
-            <summary class="btn btn-secondary btn-sm" style="display:inline-block">Show Advanced (CLI)</summary>
-            <div class="text-sm" style="margin:10px 0">Run these if automatic upload fails, then click “I Ran Commands — Start Polling”.</div>
-            <pre id="cliBlock" class="text-xs" style="background:#f3f6fb;border:1px solid var(--border-light);padding:14px;border-radius:12px;white-space:pre-wrap"></pre>
-            <div style="display:flex;gap:10px;margin-top:8px">
-              <button id="copyCli" class="btn btn-secondary btn-sm" type="button">Copy Commands</button>
-              <button id="confirmCli" class="btn btn-primary btn-sm" type="button">I Ran Commands — Start Polling</button>
-            </div>
-          </details>
         </div>
-        <div class="card-footer" style="display:flex;align-items:center;justify-content:space-between">
-          <button id="generateBtn" class="btn btn-primary btn-lg" type="button">Generate Analysis Report</button>
-          <div class="text-sm">By continuing you agree to our Terms & Privacy</div>
+
+        <!-- Steps -->
+        <div class="steps text-sm" id="steps" style="margin-top:10px">
+          <span class="step" id="st-select">① Select</span>
+          <span class="step" id="st-upload">② Upload</span>
+          <span class="step" id="st-analyze">③ Analyze</span>
+          <span class="step" id="st-report">④ Report</span>
+        </div>
+      </div>
+      <div class="card-f">
+        <button id="generateBtn" class="btn primary" type="button" aria-label="Generate analysis report">Generate Analysis Report</button>
+        <div class="text-sm">
+          <!-- TODO: Link real Terms & Privacy -->
+          By continuing you agree to our <a href="#" aria-disabled="true">Terms</a> & <a href="#" aria-disabled="true">Privacy</a>.
+          <!-- TODO: Show a nicer inline rate-limit toast -->
+          <span class="text-xs" id="limitNote" style="margin-left:8px;color:var(--subtle)"></span>
         </div>
       </div>
     </section>
 
-    <!-- Results -->
-    <section class="section">
-      <div class="card">
-        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
-          <h2>Analysis Results</h2>
-          <button id="deleteAll" class="btn btn-danger btn-sm" type="button">Clear All Results</button>
+    <!-- ===================== Results ===================== -->
+    <section class="card" aria-labelledby="res-title">
+      <div class="card-h" style="display:flex;align-items:center;justify-content:space-between">
+        <h2 id="res-title">Analysis Results</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button id="clearBtn" class="btn btn-sm danger" type="button">Clear All (client-side)</button>
         </div>
-        <div class="card-body">
-          <div id="results">
-            <div id="resultsPlaceholder" class="text-sm" style="text-align:center;padding:48px 0;color:var(--text-muted)">
-              No analyses yet. Upload screenshots above to get started.
-            </div>
-          </div>
-        </div>
+      </div>
+      <div class="card-b" id="results">
+        <div id="empty" class="text-sm" style="text-align:center;padding:46px 0;color:var(--subtle)">No analyses yet. Upload screenshots above to get started.</div>
+      </div>
+
+      <!-- Optional tiny dev samples -->
+      <div class="card-f">
+        <details>
+          <summary class="text-sm">Dev Samples (JSON) — for manual testing in the <em>Raw Data</em> tab</summary>
+          <pre class="text-xs" style="margin-top:8px">{ "analysis":{ "risk_score":18, "confidence":0.88 }, "kpis":{ "communication_balance":72, "emotional_stability":81 }, "tactics":[{"id":"minimization","likelihood":0.2}], "receipts":{"highlights":[{"quote":"Calm down, it was nothing.","tactic":"minimization"}]} }</pre>
+          <pre class="text-xs">{ "risk_score":52, "confidence":"76%", "kpis":{ "communication_balance":55, "emotional_stability":47 }, "tactics":[{"name":"gaslighting","score":64,"examples":["You always misremember.","That's not how it happened."]},{"name":"blame-shifting","likelihood":0.55}], "receipts":[{"quote":"You're imagining it."},{"quote":"If you hadn't started it…","category":"blame-shifting"}] }</pre>
+          <pre class="text-xs">{ "analysis":{ "risk_score":91, "confidence":0.93, "kpis":{ "communication_balance":22, "emotional_stability":18 } }, "tactics":[{"id":"darvo","likelihood":0.92,"examples":["Stop attacking me, I'm the victim."]},{"id":"threats","likelihood":0.88,"examples":["You'll regret this."]},{"id":"contempt","score":85}], "receipts":{"highlights":[{"quote":"You're the abusive one here.","tactic":"darvo"},{"quote":"Keep it up and see what happens.","tactic":"threats"}]} }</pre>
+        </details>
       </div>
     </section>
   </main>
 
-  <!-- Result Template -->
+  <!-- ===================== Result Template ===================== -->
   <template id="resultTpl">
-    <div class="result-card">
-      <div class="result-header">
-        <div style="display:flex;align-items:center;gap:12px">
-          <div>
-            <div style="font-weight:700">Analysis Report</div>
-            <div class="text-xs" style="font-family:var(--font-mono)"><span class="job-id"></span></div>
-          </div>
-          <div class="result-status job-status status-processing">PROCESSING</div>
+    <div class="result" role="region" aria-label="Analysis report">
+      <div class="result-h">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-weight:800">Analysis Report</div>
+          <div class="text-xs" style="font-family:var(--mono)">Job <span class="job-id"></span></div>
         </div>
-        <button class="btn btn-secondary btn-sm btn-delete" type="button">Delete</button>
+        <div class="badge proc job-status">PROCESSING</div>
       </div>
-      <div class="card-body">
-        <div class="tabs">
-          <button class="tab tab-sum active" type="button">Summary</button>
-          <button class="tab tab-det" type="button">Detailed Report</button>
-          <button class="tab tab-raw" type="button">Raw Data</button>
+      <div class="card-b">
+        <div class="tabs" role="tablist">
+          <button class="tab tab-sum active" role="tab" aria-selected="true" type="button">Summary</button>
+          <button class="tab tab-det" role="tab" aria-selected="false" type="button">Detailed Report</button>
+          <button class="tab tab-raw" role="tab" aria-selected="false" type="button">Raw Data</button>
         </div>
 
         <!-- Summary -->
-        <div class="sum-view">
-          <div class="risk-display">
+        <div class="sum" role="tabpanel">
+          <div class="risk">
             <div class="ring-wrap"></div>
-            <div style="flex:1">
-              <div class="metric"><span class="metric-label">Analysis Confidence</span><span class="metric-value conf-val">—</span></div>
-              <div class="metric"><span class="metric-label">Communication Balance</span><span class="metric-value cb-val">—</span></div>
-              <div class="metric"><span class="metric-label">Emotional Stability</span><span class="metric-value es-val">—</span></div>
+            <div class="metrics">
+              <div class="metric"><span>Risk Label</span><span class="v risk-label">—</span></div>
+              <div class="metric"><span>Analysis Confidence</span><span class="v conf-val">—</span></div>
+              <div class="metric"><span>Communication Balance</span><span class="v cb-val">—</span></div>
+              <div class="metric"><span>Emotional Stability</span><span class="v es-val">—</span></div>
+              <div class="metric"><span>Receipts</span><span class="v rc-val">—</span></div>
             </div>
           </div>
-          <div class="chips tactic-chips"></div>
-          <details style="margin-top:10px">
-            <summary class="btn btn-secondary btn-sm" type="button">View Evidence Quotes</summary>
-            <ul class="receipts-list" style="margin-top:10px"></ul>
+
+          <div class="chips tactic-chips" aria-label="Detected tactics"></div>
+
+          <div class="compact">
+            <h3 style="margin:6px 0 0">Top 3 tactics (quick view)</h3>
+            <div class="top3"></div>
+          </div>
+
+          <details style="margin-top:8px">
+            <summary class="btn btn-sm" type="button" aria-controls="receipts-list">View Evidence Quotes</summary>
+            <ul class="receipts-list" id="receipts-list" style="margin-top:10px"></ul>
           </details>
         </div>
 
         <!-- Detailed -->
-        <div class="det-view" style="display:none">
-          <div style="display:flex;gap:10px;margin-bottom:12px">
-            <button class="btn btn-secondary btn-sm btn-copy" type="button">Copy Report</button>
-            <button class="btn btn-secondary btn-sm btn-dl" type="button">Download .txt</button>
+        <div class="det" style="display:none" role="tabpanel">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+            <button class="btn btn-sm" data-copy type="button">Copy Report</button>
+            <button class="btn btn-sm" data-download type="button">Download .txt</button>
           </div>
           <div class="narrative"></div>
         </div>
 
         <!-- Raw -->
-        <div class="raw-view" style="display:none">
-          <pre class="raw-json text-xs" style="background:#f3f6fb;border:1px solid var(--border-light);padding:14px;border-radius:12px;white-space:pre-wrap"></pre>
+        <div class="raw" style="display:none" role="tabpanel">
+          <pre class="raw-json" aria-label="Raw JSON"></pre>
         </div>
       </div>
     </div>
   </template>
 
   <script>
-    /* ============ Config ============ */
-    const DEFAULT_API = "https://toxella-api-yhopcbvaia-uc.a.run.app";
-    const API_BASE = new URLSearchParams(location.search).get("api") || DEFAULT_API;
-    const BUCKET = "toxella-id-uploads";
-    const FREE_MAX_JOBS = 1, MAX_FILES = 3;
+    /* ==========================================================================================
+       Toxella Frontend (single-file, vanilla JS) — Cloud Run API hardcoded, signed URLs only.
+       Endpoints used:
+         POST  /signed-urls  { plan, count } -> { jobId, urls:[{uploadUrl, path, contentType?}] }
+         PUT   signed url(s) with file body
+         POST  /jobs         { jobId, plan, files:[{path,size,mime}], instructions? }
+         GET   /jobs/{id}    -> { status, reportId? }
+         GET   /reports/{id} -> final JSON (see mapping below)
 
-    /* ============ Elements ============ */
-    const $status = document.getElementById('statusText');
+       FIELD MAPPING — ADJUST HERE IF YOUR WORKER DIFFERS
+       ------------------------------------------------------------------------------------------
+       We defensively read values from multiple possible locations:
+
+         risk score:   rep.risk_score OR rep.analysis.risk_score OR rep.score
+         confidence:   rep.confidence OR rep.analysis.confidence
+         KPIs:
+           communication_balance: rep.kpis.communication_balance
+                                   OR rep.analysis.kpis.communication_balance
+                                   OR rep.analysis.communication_balance
+           emotional_stability:   rep.kpis.emotional_stability
+                                   OR rep.analysis.kpis.emotional_stability
+                                   OR rep.analysis.emotional_stability
+         tactics array: rep.tactics (each item may have: {id|name, score|likelihood, examples?})
+         receipts:      rep.receipts.highlights[] OR rep.receipts[] (each: {quote, tactic|category})
+
+       If your worker changes these keys, edit the accessor lines in:
+         - renderReportSummary()     (risk/label, confidence, KPIs, receipts count, chips, top3)
+         - buildPremiumReport(rep)   (the detailed narrative & spectrum)
+       Look for comments:  // <— FIELD MAPPING
+       ========================================================================================== */
+
+    /* ---------- Config ---------- */
+    const DEFAULT_API = "https://toxella-api-yhopcbvaia-uc.a.run.app"; // hardcoded live API base
+    const API_BASE = DEFAULT_API;
+    const FREE_MAX_JOBS = 1;
+    const MAX_FILES = 3;
+    const MIN_FILES = 1;
+
+    /* ---------- Elements ---------- */
     const $api = document.getElementById('apiBaseLabel');
+    const $status = document.getElementById('statusText');
     const $dz = document.getElementById('dropzone');
     const $fileInput = document.getElementById('fileInput');
+    const $gallery = document.getElementById('gallery');
     const $context = document.getElementById('context');
-    const $advanced = document.getElementById('advanced');
-    const $cliBlock = document.getElementById('cliBlock');
-    const $copyCli = document.getElementById('copyCli');
-    const $confirmCli = document.getElementById('confirmCli');
     const $generate = document.getElementById('generateBtn');
-    const $progress = document.getElementById('progress');
-    const $progressText = document.getElementById('progressText');
     const $results = document.getElementById('results');
-    const $placeholder = document.getElementById('resultsPlaceholder');
-    const $deleteAll = document.getElementById('deleteAll');
+    const $empty = document.getElementById('empty');
+    const $clear = document.getElementById('clearBtn');
+    const $limit = document.getElementById('limitNote');
     const resultTpl = document.getElementById('resultTpl');
 
-    let files = [], jobs = [], jobsCount = 0;
+    const $stSelect = document.getElementById('st-select');
+    const $stUpload = document.getElementById('st-upload');
+    const $stAnalyze = document.getElementById('st-analyze');
+    const $stReport = document.getElementById('st-report');
 
-    /* ============ Init ============ */
     $api.textContent = API_BASE;
 
-    // Drag & drop
-    ['dragenter','dragover'].forEach(ev => $dz.addEventListener(ev, e=>{e.preventDefault();e.stopPropagation();$dz.classList.add('drag-over');}));
-    ['dragleave','drop'].forEach(ev => $dz.addEventListener(ev, e=>{e.preventDefault();e.stopPropagation();$dz.classList.remove('drag-over');}));
-    $dz.addEventListener('drop', e=>handleFiles(e.dataTransfer.files));
-    // Click anywhere in the zone (label already triggers natively)
-    $dz.addEventListener('click', e=>{ if (!e.target.closest('label')) $fileInput.click(); });
-    $fileInput.addEventListener('change', e=>handleFiles(e.target.files));
+    /* ---------- State ---------- */
+    let files = [];        // [{file, id, previewUrl, status: 'Selected'|'Uploading…'|'Uploaded ✓'}]
+    let jobs = [];         // [{id, el}]
+    let jobsCount = 0;
+
+    /* ---------- Dropzone interactions ---------- */
+    ['dragenter','dragover'].forEach(ev => $dz.addEventListener(ev, e => {e.preventDefault();e.stopPropagation();$dz.classList.add('drag');}));
+    ['dragleave','drop'].forEach(ev => $dz.addEventListener(ev, e => {e.preventDefault();e.stopPropagation();$dz.classList.remove('drag');}));
+    $dz.addEventListener('click', () => $fileInput.click());
+    $fileInput.addEventListener('change', e => handleFiles(e.target.files));
+    $dz.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+    $dz.addEventListener('keydown', e => { if (e.key==='Enter' || e.key===' ') $fileInput.click(); });
 
     function handleFiles(list){
-      files = Array.from(list || []).slice(0, MAX_FILES);
+      const arr = Array.from(list || []);
+      if (!arr.length) return;
+      files = arr.slice(0, MAX_FILES).map((f,i) => ({
+        id: `${Date.now()}_${i}`,
+        file: f,
+        status: 'Selected',
+        previewUrl: URL.createObjectURL(f)
+      }));
+      markSteps('select');
+      renderGallery();
+      $limit.textContent = jobsCount >= FREE_MAX_JOBS ? 'Free limit reached: clear results to run again.' : '';
       setStatus(`${files.length} file(s) selected`);
-      if ($advanced.open) renderCLI();
     }
 
-    function setStatus(s){ $status.textContent = s; }
-    function setProgress(step, text){
-      $progressText.textContent = text;
-      const map = {upload: 'step-upload', analyze:'step-analyze', report:'step-report'};
-      for (const k of Object.values(map)){ document.getElementById(k).className = 'step'; }
-      if (map[step]){
-        if (step === 'analyze'){ document.getElementById('step-upload').classList.add('done'); }
-        if (step === 'report'){ document.getElementById('step-upload').classList.add('done'); document.getElementById('step-analyze').classList.add('done'); }
-        document.getElementById(map[step]).classList.add('active');
+    function renderGallery(){
+      $gallery.innerHTML = files.map(item => {
+        const {file, status, previewUrl} = item;
+        const size = human(file.size);
+        const name = escapeHtml(file.name);
+        const img = file.type.startsWith('image/') ? `<img src="${previewUrl}" alt="${name} preview">` : '📄';
+        return `
+          <div class="file" aria-label="${name}">
+            <div class="thumb" aria-hidden="true">${img}</div>
+            <div class="meta">
+              <div class="name" title="${name}">${name}</div>
+              <div class="stat">${size} • <span class="st">${status}</span></div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function updateFileStatus(idx, status){
+      if (!files[idx]) return;
+      files[idx].status = status;
+      const card = $gallery.children[idx];
+      if (card){
+        const st = card.querySelector('.st');
+        if (st) st.textContent = status;
       }
     }
 
-    /* ============ CLI Fallback ============ */
-    function renderCLI(){
-      if (!files.length){ $cliBlock.textContent = '# Select files first'; return; }
-      const D='$';
-      const names = files.map(f=>`"${f.name}"`).join(' ');
-      const fileJsons = files.map((f,i)=>`{"path":"uploads/${D}JOB_ID/${i}.jpg"}`).join(',');
-      $cliBlock.textContent =
-`# macOS/Linux
-API="${API_BASE}"
-BUCKET="${BUCKET}"
-JOB_ID="$(uuidgen 2>/dev/null || python3 -c 'import uuid;print(uuid.uuid4())')"
-echo "JOB_ID=${D}JOB_ID"
-
-i=0; for f in ${names}; do
-  gsutil cp "\${f}" "gs://${D}BUCKET/uploads/${D}JOB_ID/${D}i.jpg"; i=$((i+1));
-done
-
-curl -sS -X POST "${D}API/jobs" -H "Content-Type: application/json" -d '{
-  "jobId":"'"${D}JOB_ID"'","plan":"free","files":[${fileJsons}],
-  "instructions": ${JSON.stringify(JSON.stringify(($context.value||'').trim()))}
-}'
-
-watch -n 3 curl -sS "${D}API/jobs/${D}JOB_ID"
-
-# Windows PowerShell
-${D}Api="${API_BASE}"
-${D}Bucket="${BUCKET}"
-${D}JOB_ID=[guid]::NewGuid().Guid
-"JOB_ID=${D}JOB_ID"
-${files.map((f,i)=>`gsutil cp "${f.name}" "gs://${D}Bucket/uploads/${D}JOB_ID/${i}.jpg"`).join('\n')}
-${D}JobJson=@"
-{ "jobId":"${D}JOB_ID","plan":"free","files":[${fileJsons}],
-  "instructions": ${JSON.stringify(($context.value||'').trim())}
-}
-"@
-Invoke-RestMethod -Method POST -Uri "${D}Api/jobs" -ContentType "application/json" -Body ${D}JobJson
-while(${D}true){ curl "${D}Api/jobs/${D}JOB_ID"; Start-Sleep 3 }`;
+    /* ---------- Steps UI ---------- */
+    function markSteps(phase){
+      [$stSelect,$stUpload,$stAnalyze,$stReport].forEach(el => el.className='step');
+      if (phase==='select'){ $stSelect.classList.add('active'); }
+      if (phase==='upload'){ $stSelect.classList.add('done'); $stUpload.classList.add('active'); }
+      if (phase==='analyze'){ $stSelect.classList.add('done'); $stUpload.classList.add('done'); $stAnalyze.classList.add('active'); }
+      if (phase==='report'){ $stSelect.classList.add('done'); $stUpload.classList.add('done'); $stAnalyze.classList.add('done'); $stReport.classList.add('active'); }
     }
-    $advanced.addEventListener('toggle', ()=>{ if ($advanced.open) renderCLI(); });
-    $copyCli.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText($cliBlock.textContent); setStatus('CLI copied'); }catch{ setStatus('Copy failed'); } });
-    $confirmCli.addEventListener('click', ()=>{ const id = prompt('Paste the JOB_ID from your terminal:'); if (id) addResultCard(id); });
 
-    /* ============ Generate Flow ============ */
-    document.getElementById('generateBtn').addEventListener('click', async ()=>{
+    /* ---------- Generate Flow ---------- */
+    $generate.addEventListener('click', startGenerate);
+
+    async function startGenerate(){
       try{
-        if (jobsCount >= FREE_MAX_JOBS) return setStatus('Free plan limit reached. Clear results to run again.');
-        if (files.length < 2) return setStatus('Please select at least 2 screenshots.');
+        if (jobsCount >= FREE_MAX_JOBS){
+          // TODO: show nicer toast / inline CTA
+          setStatus('Free plan limit reached this session. Clear results to run again.');
+          $limit.textContent = 'Free limit reached: clear results to run again.';
+          return;
+        }
+        if (files.length < MIN_FILES) return setStatus(`Please select ${MIN_FILES}–${MAX_FILES} screenshots.`);
         if (files.length > MAX_FILES) return setStatus(`Maximum ${MAX_FILES} files allowed.`);
 
-        $progress.style.display = 'block';
-        setProgress('upload','Requesting upload slots…');
+        markSteps('upload');
+        setStatus('Requesting signed URLs…');
 
         const r = await fetch(`${API_BASE}/signed-urls`, {
           method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ plan:'free', count: files.length })
         });
         const j = await r.json();
-        if (!r.ok) throw new Error(j.error || 'Upload request failed');
+        if (!r.ok) throw new Error(j.error || 'Failed to get signed URLs');
 
-        const { jobId, urls=[] } = j;
+        const { jobId, urls=[] } = j || {};
         if (!jobId || urls.length < files.length) throw new Error('Server did not provide enough upload slots');
 
-        // Upload
-        setProgress('upload','Uploading screenshots…');
-        const metas = [];
+        // Upload each file
         for (let i=0;i<files.length;i++){
-          const f = files[i], u = urls[i];
+          updateFileStatus(i, 'Uploading…');
+          const f = files[i].file;
+          const u = urls[i];
           const ct = u.contentType || f.type || 'application/octet-stream';
           const put = await fetch(u.uploadUrl, { method:'PUT', headers:{'Content-Type':ct}, body:f });
           if (!put.ok) throw new Error(`Upload failed for ${f.name} (${put.status})`);
-          metas.push({ path:u.path, size:f.size, mime:f.type || ct });
+          updateFileStatus(i, 'Uploaded ✓');
         }
 
         // Create job
-        setProgress('analyze','Creating analysis job…');
+        markSteps('analyze');
+        setStatus('Creating analysis job…');
+        const metas = urls.map((u,i)=>({ path:u.path, size: files[i].file.size, mime: files[i].file.type || 'application/octet-stream' }));
         const instructions = ($context.value||'').trim();
         const cr = await fetch(`${API_BASE}/jobs`, {
           method:'POST', headers:{'Content-Type':'application/json'},
@@ -397,106 +433,57 @@ while(${D}true){ curl "${D}Api/jobs/${D}JOB_ID"; Start-Sleep 3 }`;
         const cj = await cr.json();
         if (!cr.ok) throw new Error(cj.error || 'Job creation failed');
 
-        setProgress('report','Analysis in progress…');
+        setStatus('Analysis in progress…');
+        markSteps('analyze');
         addResultCard(jobId);
         jobsCount++;
-        setStatus('Analysis started. You can keep this page open.');
       }catch(e){
         console.error(e);
         setStatus(e.message || 'Something went wrong');
-        $progress.style.display = 'none';
       }
-    });
+    }
 
-    /* ============ Results Rendering ============ */
+    /* ---------- Results ---------- */
     function addResultCard(jobId){
+      if ($empty) $empty.style.display='none';
       const frag = resultTpl.content.cloneNode(true);
       const el = frag.children[0];
-      el.querySelector('.job-id').textContent = jobId;
       const $statusEl = el.querySelector('.job-status');
-      const $btnDel = el.querySelector('.btn-delete');
-      const tabs = el.querySelectorAll('.tab');
-      const $sum = el.querySelector('.sum-view'), $det = el.querySelector('.det-view'), $raw = el.querySelector('.raw-view');
-      const $rawJson = el.querySelector('.raw-json');
-      const $ring = el.querySelector('.ring-wrap');
-      const $chips = el.querySelector('.tactic-chips');
-      const $receipts = el.querySelector('.receipts-list');
-      const $narr = el.querySelector('.narrative');
+      el.querySelector('.job-id').textContent = jobId;
 
+      const tabs = el.querySelectorAll('.tab');
+      const $sum = el.querySelector('.sum'), $det = el.querySelector('.det'), $raw = el.querySelector('.raw');
       tabs.forEach(btn=>{
         btn.addEventListener('click', ()=>{
-          tabs.forEach(t=>t.classList.remove('active')); btn.classList.add('active');
-          $sum.style.display = btn.classList.contains('tab-sum') ? 'block':'none';
-          $det.style.display = btn.classList.contains('tab-det') ? 'block':'none';
-          $raw.style.display = btn.classList.contains('tab-raw') ? 'block':'none';
+          tabs.forEach(t=>{ t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+          btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+          $sum.style.display = btn.classList.contains('tab-sum')?'block':'none';
+          $det.style.display = btn.classList.contains('tab-det')?'block':'none';
+          $raw.style.display = btn.classList.contains('tab-raw')?'block':'none';
         });
       });
 
-      $btnDel.addEventListener('click', async ()=>{
-        try{ await fetch(`${API_BASE}/jobs/${encodeURIComponent(jobId)}`, { method:'DELETE' }); }catch{}
-        el.remove(); jobs = jobs.filter(j=>j.id!==jobId); setStatus('Job deleted');
-      });
-
-      if ($placeholder) $placeholder.style.display = 'none';
       $results.prepend(el);
 
       async function poll(){
         try{
           const jr = await fetch(`${API_BASE}/jobs/${encodeURIComponent(jobId)}`, { cache:'no-store' });
           const j = await jr.json();
-          const st = (j.status||'').toUpperCase();
-          $statusEl.textContent = st || 'PENDING';
-          $statusEl.className = 'result-status job-status ' + (st.includes('COMPLETE')?'status-complete': st.includes('ERROR')?'status-error':'status-processing');
+          const st = (j.status||'').toUpperCase() || 'PENDING';
+          $statusEl.textContent = st;
+          $statusEl.className = 'badge ' + (st.includes('COMPLETE') ? 'ok' : st.includes('ERROR') ? 'warn' : 'proc');
 
           if (j.reportId){
+            markSteps('report');
             const rr = await fetch(`${API_BASE}/reports/${encodeURIComponent(j.reportId)}`, { cache:'no-store' });
             const rep = await rr.json();
-            $rawJson.textContent = JSON.stringify(rep, null, 2);
-
-            // Risk ring
-            const score = toInt(rep.risk_score ?? rep.analysis?.risk_score ?? rep.score ?? 0);
-            $ring.innerHTML = ring(score);
-
-            // Metrics
-            const conf = rep.confidence ?? rep.analysis?.confidence ?? null;
-            el.querySelector('.conf-val').textContent = toPct(conf);
-
-            const cb = firstNumber(rep.kpis?.communication_balance, rep.analysis?.kpis?.communication_balance, rep.analysis?.communication_balance);
-            const es = firstNumber(rep.kpis?.emotional_stability, rep.analysis?.kpis?.emotional_stability, rep.analysis?.emotional_stability);
-            if (typeof cb === 'number') el.querySelector('.cb-val').textContent = `${Math.round(cb)} / 100`;
-            if (typeof es === 'number') el.querySelector('.es-val').textContent = `${Math.round(es)} / 100`;
-
-            // Tactic chips
-            const tactics = Array.isArray(rep.tactics)?rep.tactics:[];
-            $chips.innerHTML = tactics.slice(0,6).map(t=>{
-              const name=(t.name||t.id||t).toString();
-              let raw=(typeof t.score==='number'?t.score:(typeof t.likelihood==='number'?t.likelihood:null));
-              const val = raw==null?'':(raw<=1?Math.round(raw*100):Math.round(raw));
-              return `<span class="chip">${escapeHtml(name)}${val!==''?` • ${val}`:''}</span>`;
-            }).join('') || `<span class="text-sm">No tactics extracted</span>`;
-
-            // Receipts (flat list)
-            const recs = rep?.receipts?.highlights || rep?.receipts || [];
-            $receipts.innerHTML = recs.slice(0,12).map(r=>{
-              const q = (r.quote || r || '').toString().slice(0,280);
-              const cat = r.category || r.tactic || '';
-              return `<li>“${escapeHtml(q)}” <span class="text-xs" style="margin-left:6px;color:#6b7280">${escapeHtml(cat)}</span></li>`;
-            }).join('') || `<li class="text-sm">No quotes extracted</li>`;
-
-            // Detailed narrative
-            $narr.innerHTML = buildPremiumReport(rep);
-
-            // Copy/Download
-            const $copy = el.querySelector('.btn-copy');
-            const $dl = el.querySelector('.btn-dl');
-            if ($copy) $copy.onclick = async()=>{ await navigator.clipboard.writeText($narr.innerText.trim()); setStatus('Report copied'); };
-            if ($dl) $dl.onclick = ()=>{ const blob = new Blob([$narr.innerText],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`toxella_report_${jobId}.txt`; a.click(); URL.revokeObjectURL(a.href); };
-
-            $progress.style.display = 'none';
+            renderReportSummary(el, rep, jobId);
+            renderReportDetailed(el, rep, jobId);
+            renderReportRaw(el, rep);
             setStatus('Analysis complete');
             return;
           }
-          if (st.includes('ERROR')){ $progress.style.display = 'none'; setStatus('Analysis failed'); return; }
+          if (st.includes('ERROR')){ setStatus('Analysis failed'); return; }
         }catch(e){ /* transient */ }
         setTimeout(poll, 2500);
       }
@@ -504,29 +491,118 @@ while(${D}true){ curl "${D}Api/jobs/${D}JOB_ID"; Start-Sleep 3 }`;
       jobs.push({id:jobId, el});
     }
 
-    // Delete all
-    $deleteAll.addEventListener('click', async ()=>{
-      for (const j of jobs){ try{ await fetch(`${API_BASE}/jobs/${encodeURIComponent(j.id)}`, {method:'DELETE'}); }catch{} }
-      $results.innerHTML = '<div id="resultsPlaceholder" class="text-sm" style="text-align:center;padding:48px 0;color:#718096">No analyses yet. Upload screenshots above to get started.</div>';
-      jobs=[]; jobsCount=0; setStatus('All results cleared');
+    function renderReportRaw(el, rep){
+      const $rawJson = el.querySelector('.raw-json');
+      if ($rawJson) $rawJson.textContent = JSON.stringify(rep, null, 2);
+    }
+
+    function renderReportSummary(el, rep, jobId){
+      const $ringWrap = el.querySelector('.ring-wrap');
+      const $riskLabel = el.querySelector('.risk-label');
+      const $conf = el.querySelector('.conf-val');
+      const $cb = el.querySelector('.cb-val');
+      const $es = el.querySelector('.es-val');
+      const $rc = el.querySelector('.rc-val');
+      const $chips = el.querySelector('.tactic-chips');
+      const $top3 = el.querySelector('.top3');
+      const $receipts = el.querySelector('.receipts-list');
+
+      // <— FIELD MAPPING
+      const score = toInt(rep.risk_score ?? rep.analysis?.risk_score ?? rep.score ?? 0);
+      const label = (rep.risk_label || (score<34?'Low':score<=66?'Medium':'High'));
+      const conf = rep.confidence ?? rep.analysis?.confidence ?? null;
+
+      const cb = firstNumber(rep.kpis?.communication_balance, rep.analysis?.kpis?.communication_balance, rep.analysis?.communication_balance);
+      const es = firstNumber(rep.kpis?.emotional_stability, rep.analysis?.kpis?.emotional_stability, rep.analysis?.emotional_stability);
+
+      const receipts = Array.isArray(rep?.receipts?.highlights) ? rep.receipts.highlights
+                      : Array.isArray(rep?.receipts) ? rep.receipts : [];
+      const tactics = Array.isArray(rep.tactics) ? rep.tactics : [];
+
+      // Risk ring + label
+      $ringWrap.innerHTML = ring(score);
+      $riskLabel.textContent = label;
+
+      // Metrics
+      $conf.textContent = toPct(conf);
+      $cb.textContent = typeof cb==='number' ? `${Math.round(cb)} / 100` : '—';
+      $es.textContent = typeof es==='number' ? `${Math.round(es)} / 100` : '—';
+      $rc.textContent = `${receipts.length}`;
+
+      // Tactic chips (show up to 6)
+      $chips.innerHTML = tactics.slice(0,6).map(t=>{
+        const name=(t.name||t.id||'').toString();
+        const rawScore = (typeof t.score==='number'?t.score:(typeof t.likelihood==='number'?t.likelihood:null));
+        const val = rawScore==null ? '' : (rawScore<=1?Math.round(rawScore*100):Math.round(rawScore));
+        return `<span class="chip">${escapeHtml(prettyTactic(name))}${val!==''?` • ${val}`:''}</span>`;
+      }).join('') || `<span class="text-sm">No tactics extracted</span>`;
+
+      // Top 3 tactics with 1–2 quotes each (compact)
+      const tScores = tacticScores(tactics);
+      const grouped = receiptsByTactic(rep);
+      const top = tScores.sort((a,b)=>b.score-a.score).slice(0,3).filter(t=>t.score>0);
+      if (!top.length){
+        $top3.innerHTML = `<div class="text-sm" style="color:var(--muted)">No strong manipulation indicators detected.</div>`;
+      } else {
+        $top3.innerHTML = top.map(t=>{
+          const id = t.id;
+          const quotes = (grouped[id]||[]).slice(0,2).map(q=>`“${escapeHtml(q)}”`).join(' • ');
+          return `<div class="text-sm"><strong>${escapeHtml(TACTIC_NAME[id]||prettyTactic(id))}</strong> — <span style="color:var(--muted)">${quotes || 'signals present'}</span></div>`;
+        }).join('');
+      }
+
+      // Flat receipts list (cap at 12)
+      $receipts.innerHTML = receipts.slice(0,12).map(r=>{
+        const q = (r.quote || r || '').toString().slice(0,280);
+        const cat = r.category || r.tactic || '';
+        return `<li>“${escapeHtml(q)}” <span class="text-xs" style="margin-left:6px;color:var(--subtle)">${escapeHtml(prettyTactic(cat))}</span></li>`;
+      }).join('') || `<li class="text-sm">No quotes extracted</li>`;
+    }
+
+    function renderReportDetailed(el, rep, jobId){
+      const $narr = el.querySelector('.narrative');
+      const $copy = el.querySelector('[data-copy]');
+      const $dl = el.querySelector('[data-download]');
+      const html = buildPremiumReport(rep);
+      $narr.innerHTML = html;
+      $copy.onclick = async ()=>{ await navigator.clipboard.writeText($narr.innerText.trim()); setStatus('Report copied'); };
+      $dl.onclick = ()=>{ const blob = new Blob([$narr.innerText],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`toxella_report_${jobId}.txt`; a.click(); URL.revokeObjectURL(a.href); };
+    }
+
+    /* ---------- Clear (client-side only, keeps backend jobs intact) ---------- */
+    $clear.addEventListener('click', ()=>{
+      $results.innerHTML = '';
+      $results.appendChild($empty);
+      $empty.style.display='block';
+      jobs = []; jobsCount = 0;
+      setStatus('Cleared. You can run another report.');
+      $limit.textContent = '';
+      markSteps('select');
     });
 
-    /* ============ Helpers ============ */
+    /* ---------- Helpers ---------- */
+    function setStatus(s){ $status.textContent = s; }
+    function human(n){
+      const u=['B','KB','MB','GB']; let i=0, x=n;
+      while(x>=1024 && i<u.length-1){ x/=1024; i++; }
+      return `${x.toFixed(x>=10||i===0?0:1)} ${u[i]}`;
+    }
+    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]); }
+    function toInt(x){ if (typeof x==='number') return Math.round(x<=1?x*100:x); if (typeof x==='string' && /^\d+$/.test(x)) return parseInt(x,10); return 0; }
+    function toPct(x){ if (typeof x==='number') return `${Math.round(x<=1?x*100:x)}%`; if (typeof x==='string' && /^\d+%$/.test(x)) return x; if (typeof x==='string' && /^\d+(\.\d+)?$/.test(x)) return `${Math.round(parseFloat(x)<=1?parseFloat(x)*100:parseFloat(x))}%`; return '—'; }
+    function firstNumber(...vals){ for (const v of vals){ if (typeof v==='number' && !isNaN(v)) return v; } return null; }
+
     function ring(score){
       const pct = Math.max(0,Math.min(100,Math.round(score||0)));
-      const r=45,c=2*Math.PI*r,d=(pct/100)*c; let col='#38a169'; if (pct>=67) col='#e53e3e'; else if (pct>=34) col='#ed8936';
-      return `<svg class="risk-circle" viewBox="0 0 120 120" role="img" aria-label="Risk ${pct}/100">
-        <circle cx="60" cy="60" r="${r}" stroke="#e2e8f0" stroke-width="8" fill="none"/>
+      const r=45,c=2*Math.PI*r,d=(pct/100)*c; let col='#16a34a'; if (pct>=67) col='#ef4444'; else if (pct>=34) col='#f59e0b';
+      return `<svg class="ring" viewBox="0 0 120 120" role="img" aria-label="Risk ${pct}/100">
+        <circle cx="60" cy="60" r="${r}" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--ring').trim()||'#e5e7eb'}" stroke-width="8" fill="none"/>
         <circle cx="60" cy="60" r="${r}" stroke="${col}" stroke-width="8" fill="none" stroke-dasharray="${d} ${c-d}" stroke-linecap="round" transform="rotate(-90 60 60)"/>
-        <g class="risk-value"><text x="60" y="64" text-anchor="middle">${pct}</text></g>
+        <g class="val"><text x="60" y="63" text-anchor="middle">${pct}</text></g>
       </svg>`;
     }
-    function toInt(x){ if (typeof x==='number') return Math.round(x<=1?x*100:x); if (typeof x==='string' && /^\d+$/.test(x)) return parseInt(x,10); return 0; }
-    function toPct(x){ if (typeof x==='number') return `${Math.round(x<=1?x*100:x)}%`; if (typeof x==='string' && /^\d+%$/.test(x)) return x; return '—'; }
-    function firstNumber(...vals){ for (const v of vals){ if (typeof v==='number' && !isNaN(v)) return v; } return null; }
-    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-    /* ============ Premium Narrative Builder ============ */
+    /* ---------- Tactics & narrative builder ---------- */
     const TACTIC_ORDER = ["gaslighting","darvo","blame-shifting","minimization","stonewalling","contempt","guilt-tripping","threats","coercion","triangulation","boundaries","projection"];
     const TACTIC_NAME = {
       "gaslighting":"Gaslighting",
@@ -543,19 +619,20 @@ while(${D}true){ curl "${D}Api/jobs/${D}JOB_ID"; Start-Sleep 3 }`;
       "projection":"Projection"
     };
     const TACTIC_DESC = {
-      "gaslighting":"Denies or distorts reality to make you doubt your memory, perception, or sanity.",
-      "darvo":"Flips roles: denies harm, attacks the accuser, and claims to be the real victim.",
+      "gaslighting":"Denies or distorts reality to make you doubt your perception or memory.",
+      "darvo":"Flips roles: denies harm, attacks you, and claims to be the real victim.",
       "blame-shifting":"Redirects responsibility back onto you or others.",
-      "minimization":"Downplays the seriousness of events/feelings to avoid accountability.",
+      "minimization":"Downplays the seriousness of events or feelings to avoid accountability.",
       "stonewalling":"Refuses to engage or delays to block resolution.",
       "contempt":"Mocks, belittles, or insults; communicates superiority or disgust.",
       "guilt-tripping":"Uses guilt to coerce compliance when you did not do wrong.",
       "threats":"Explicit or implied threats to punish, harm, or abandon.",
       "coercion":"Controls choices through pressure, ultimatums, or consequences.",
       "triangulation":"Pulls in third parties to intimidate or discredit.",
-      "boundaries":"Invokes ‘boundaries’ selectively to dodge accountability or control access.",
+      "boundaries":"Invokes ‘boundaries’ selectively to control access or dodge accountability.",
       "projection":"Accuses you of the very behavior they’re doing."
     };
+    function prettyTactic(x){ return TACTIC_NAME[normId(x)] || (String(x||'').charAt(0).toUpperCase()+String(x||'').slice(1)); }
     function normId(x){
       const s = String(x||'').toLowerCase();
       if (s.includes('boundary')) return 'boundaries';
@@ -606,14 +683,22 @@ while(${D}true){ curl "${D}Api/jobs/${D}JOB_ID"; Start-Sleep 3 }`;
         </div>
       </div>`;
     }
+    function tacticScores(tactics){
+      return TACTIC_ORDER.map(id => ({ id, score: scoreFor(tactics, id) }));
+    }
+
     function buildPremiumReport(rep){
+      // <— FIELD MAPPING
       const score = toInt(rep.risk_score ?? rep.analysis?.risk_score ?? rep.score ?? 0);
-      const label = (rep.risk_label || (score<34?'low':score<=66?'medium':'high')).toUpperCase();
+      const label = (rep.risk_label || (score<34?'LOW':score<=66?'MEDIUM':'HIGH'));
       const confPct = toPct(rep.confidence ?? rep.analysis?.confidence ?? 0.85);
       const cb = firstNumber(rep.kpis?.communication_balance, rep.analysis?.kpis?.communication_balance, rep.analysis?.communication_balance);
       const es = firstNumber(rep.kpis?.emotional_stability, rep.analysis?.kpis?.emotional_stability, rep.analysis?.emotional_stability);
 
-      let html = `<div class="block"><h3>Scores</h3><ul>
+      let html = `<div class="text-sm" style="margin-bottom:8px;color:var(--muted)">
+        Below is a narrative summary, a 12-tactic spectrum, grouped receipts, and calm response suggestions.</div>`;
+
+      html += `<div><h3 style="margin:6px 0 0">Scores</h3><ul style="margin:6px 0 0 18px">
         <li>Manipulation Risk: <strong>${score} / 100 (${label})</strong></li>
         ${typeof cb==='number'?`<li>Communication Balance: <strong>${Math.round(cb)} / 100</strong></li>`:''}
         ${typeof es==='number'?`<li>Emotional Stability: <strong>${Math.round(es)} / 100</strong></li>`:''}
@@ -622,54 +707,37 @@ while(${D}true){ curl "${D}Api/jobs/${D}JOB_ID"; Start-Sleep 3 }`;
 
       // Spectrum
       let spectrum = '';
-      const tScores=[];
-      for (const id of TACTIC_ORDER){ const s = scoreFor(rep.tactics, id); tScores.push({id,score:s}); spectrum += spectrumRow(TACTIC_NAME[id], s); }
-      html += `<div class="block"><h3>Tactic Spectrum</h3><div class="spectrum">${spectrum}</div>
-        <div class="scale"><span>None</span><span>Low</span><span>Medium</span><span>High</span><span>Severe</span></div></div>`;
+      const tScores=tacticScores(rep.tactics||[]);
+      for (const id of TACTIC_ORDER){ spectrum += spectrumRow(TACTIC_NAME[id], tScores.find(t=>t.id===id)?.score||0); }
+      html += `<div style="margin-top:10px"><h3 style="margin:0">Tactic Spectrum</h3>
+        <div class="scale"><span>None</span><span>Low</span><span>Medium</span><span>High</span><span>Severe</span></div>
+        <div>${spectrum}</div></div>`;
 
-      // Top tactics
+      // Narrative paragraph
       const top = tScores.slice().sort((a,b)=>b.score-a.score).slice(0,3).filter(t=>t.score>0);
-      html += `<div class="block"><h3>Top Tactics (what it looks like)</h3>`;
-      if (!top.length){
-        html += `<p class="text-sm">No strong manipulation indicators detected; language may still be tense.</p>`;
-      } else {
-        const grouped = receiptsByTactic(rep);
-        for (const t of top){
-          const id=t.id, name=TACTIC_NAME[id], ex=(grouped[id]||[]).slice(0,4);
-          html += `<div class="block">
-            <div style="display:flex;align-items:center;gap:10px"><strong>${escapeHtml(name)}</strong>
-              <span class="result-status status-processing" style="padding:3px 8px;border-radius:999px">${t.score}/100</span>
-            </div>
-            <div class="text-sm" style="margin:6px 0">${escapeHtml(TACTIC_DESC[id])}</div>
-            ${ex.length?`<ul>${ex.map(q=>`<li>“${escapeHtml(q)}”</li>`).join('')}</ul>`:`<div class="text-sm">Signals present, no quotable snippets extracted.</div>`}
-          </div>`;
-        }
-      }
-      html += `</div>`;
-
-      // Summary paragraph
-      html += `<div class="block"><h3>Summary</h3>
-        <p>This conversation shows ${label==='HIGH'?'severe':label==='MEDIUM'?'elevated':'low'} manipulation risk. The most salient patterns are
-        ${top.length? top.map(t=>escapeHtml(TACTIC_NAME[t.id])).join(', '):'no strong tactics'}.
-        Use the receipts below as evidence, and consider calm boundary-setting responses.</p></div>`;
+      html += `<div style="margin-top:10px"><h3 style="margin:0">Narrative</h3>
+        <p>The conversation presents <strong>${label.toLowerCase()}</strong> manipulation risk overall (score ${score}/100).
+        The most salient patterns ${top.length ? 'include ' + top.map(t=>TACTIC_NAME[t.id]).join(', ') : 'are not strongly expressed'}.
+        Language shows ${typeof cb==='number'?(cb<40?'dominance/monologue tendencies':'some balance in turn-taking'): 'variable turn-taking'} and ${typeof es==='number'?(es<40?'emotional volatility':'reasonable emotional control'):'mixed emotional tone'}.
+        Consider using short, calm prompts that keep focus on one concrete topic at a time.</p></div>`;
 
       // Grouped receipts
       const grouped = receiptsByTactic(rep);
-      html += `<div class="block"><h3>Receipts (flagged quotes, grouped)</h3>`;
       const any = Object.keys(grouped).some(k => (grouped[k]||[]).length);
+      html += `<div style="margin-top:6px"><h3 style="margin:0">Receipts (flagged quotes, grouped)</h3>`;
       if (!any){ html += `<p class="text-sm">No quotable receipts were extracted.</p>`; }
       else {
         for (const id of TACTIC_ORDER){
           const arr = grouped[id]; if (!arr || !arr.length) continue;
-          html += `<h4 style="margin:10px 0 4px">${escapeHtml(TACTIC_NAME[id])}</h4>
-                   <ul>${arr.map(q=>`<li>“${escapeHtml(q)}”</li>`).join('')}</ul>`;
+          html += `<h4 style="margin:10px 0 6px">${escapeHtml(TACTIC_NAME[id])}</h4>
+                   <ul style="margin:0 0 0 18px">${arr.map(q=>`<li>“${escapeHtml(q)}”</li>`).join('')}</ul>`;
         }
       }
       html += `</div>`;
 
       // Suggestions
-      html += `<div class="block"><h3>Suggested Responses (non-escalating)</h3>
-        <ul>
+      html += `<div style="margin-top:10px"><h3 style="margin:0">Suggested Responses (non-escalating)</h3>
+        <ul style="margin:6px 0 0 18px">
           <li>“Calling me names doesn’t address the question. Can you answer directly?”</li>
           <li>“Let’s stay with this specific event. I’m asking about that.”</li>
           <li>“If we can’t talk respectfully right now, let’s pause and revisit later.”</li>
@@ -677,6 +745,11 @@ while(${D}true){ curl "${D}Api/jobs/${D}JOB_ID"; Start-Sleep 3 }`;
 
       return html;
     }
+
+    /* ---------- Utility: names ---------- */
+    function prettyName(x){ return x && typeof x==='string' ? x : 'Unknown'; }
+
+    /* ---------- END Helpers ---------- */
   </script>
 </body>
 </html>
