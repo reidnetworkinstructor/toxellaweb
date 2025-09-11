@@ -49,6 +49,7 @@
     .meta{flex:1;min-width:0}
     .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
     .stat{font-size:.82rem;color:var(--muted)}
+    .visually-hidden{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important}
 
     /* ---------- Buttons & inputs ---------- */
     .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:600}
@@ -130,12 +131,16 @@
         <p class="text-sm">Upload up to <strong>3</strong> images (JPG/PNG). Free plan: <strong>one</strong> report per session.</p>
       </div>
       <div class="card-b">
-        <div id="dropzone" class="drop" tabindex="0" role="button" aria-label="Upload screenshots (drop or click)">
+        <!-- Dropzone + file input (label triggers file picker reliably) -->
+        <label id="dropzone" class="drop" tabindex="0" role="button" for="fileInput"
+               aria-label="Upload screenshots (drop or click)">
           <div class="icon">📱</div>
           <div><strong>Drop screenshots</strong> here or click to browse</div>
-          <div class="text-xs" style="margin-top:6px">We generate short-lived, v4 signed URLs and upload directly to secure storage.</div>
-          <input id="fileInput" type="file" accept="image/*" multiple hidden>
-        </div>
+          <div class="text-xs" style="margin-top:6px">
+            We generate short-lived, v4 signed URLs and upload directly to secure storage.
+          </div>
+        </label>
+        <input id="fileInput" type="file" accept="image/*" multiple class="visually-hidden" aria-hidden="true">
 
         <!-- File gallery -->
         <div id="gallery" class="gallery" aria-live="polite" aria-relevant="additions text"></div>
@@ -325,12 +330,17 @@
     let jobsCount = 0;
 
     /* ---------- Dropzone interactions ---------- */
-    ['dragenter','dragover'].forEach(ev => $dz.addEventListener(ev, e => {e.preventDefault();e.stopPropagation();$dz.classList.add('drag');}));
-    ['dragleave','drop'].forEach(ev => $dz.addEventListener(ev, e => {e.preventDefault();e.stopPropagation();$dz.classList.remove('drag');}));
-    $dz.addEventListener('click', () => $fileInput.click());
-    $fileInput.addEventListener('change', e => handleFiles(e.target.files));
+    // Using a <label for="fileInput"> ensures reliable picker open. No programmatic .click() needed for mouse.
+    ['dragenter','dragover'].forEach(ev => $dz.addEventListener(ev, e => {
+      e.preventDefault(); e.stopPropagation(); $dz.classList.add('drag');
+    }));
+    ['dragleave','drop'].forEach(ev => $dz.addEventListener(ev, e => {
+      e.preventDefault(); e.stopPropagation(); $dz.classList.remove('drag');
+    }));
     $dz.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+    // Keyboard accessibility: Enter/Space on the label also opens the picker on most browsers.
     $dz.addEventListener('keydown', e => { if (e.key==='Enter' || e.key===' ') $fileInput.click(); });
+    $fileInput.addEventListener('change', e => handleFiles(e.target.files));
 
     function handleFiles(list){
       const arr = Array.from(list || []);
@@ -745,9 +755,6 @@
 
       return html;
     }
-
-    /* ---------- Utility: names ---------- */
-    function prettyName(x){ return x && typeof x==='string' ? x : 'Unknown'; }
 
     /* ---------- END Helpers ---------- */
   </script>
