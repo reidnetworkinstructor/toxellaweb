@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Analyze conversation screenshots for manipulation patterns with AI-powered insights." />
   <style>
-    /* ===================== Design System (lightweight, no external libs) ===================== */
     :root{
       --bg:#f7f9fc; --panel:#ffffff; --ink:#101828; --muted:#667085; --subtle:#98a2b3;
       --line:#e5e7eb; --line-2:#d0d5dd;
@@ -25,23 +24,22 @@
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;letter-spacing:-.02em}
     h2{font-size:1.4rem;margin:0 0 8px}
     .text-sm{font-size:.92rem;color:var(--muted)} .text-xs{font-size:.8rem;color:var(--subtle)}
-    .header{background:linear-gradient(180deg,#fff, #f8fbff);border-bottom:1px solid var(--line)}
+    .header{background:linear-gradient(180deg,#fff,#f8fbff);border-bottom:1px solid var(--line)}
     .header-content{display:flex;align-items:center;justify-content:space-between;padding:22px 0;gap:12px;flex-wrap:wrap}
     .brand{display:flex;align-items:center;gap:12px}
     .logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--acc),var(--acc-2));color:#fff;display:grid;place-items:center;font-size:22px;box-shadow:var(--shadow)}
     .ready{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fff;border:1px solid var(--line);border-radius:10px}
     .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
-
+    .toast{position:fixed;right:16px;bottom:16px;display:grid;gap:8px;max-width:92vw;z-index:9999}
+    .toast .t{background:#111827;color:#fff;padding:10px 12px;border-radius:10px;box-shadow:var(--shadow);font-size:.92rem}
+    .t.ok{background:#166534}.t.warn{background:#92400e}.t.err{background:#7f1d1d}
     .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden;margin:28px 0}
     .card-h{padding:22px 22px 0}
     .card-b{padding:22px}
     .card-f{padding:12px 22px 22px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-
-    /* ---------- Upload zone & gallery ---------- */
     .drop{border:2px dashed var(--line-2);border-radius:16px;background:#f8fafc;padding:36px;text-align:center;cursor:pointer;transition:.15s}
     .drop:hover,.drop.drag{border-color:var(--acc);background:#eef5ff;transform:translateY(-1px)}
     .drop .icon{width:58px;height:58px;border-radius:50%;background:var(--acc);color:#fff;display:grid;place-items:center;margin:0 auto 10px;font-size:22px}
-
     .gallery{margin-top:16px;display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
     .file{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff}
     .thumb{width:56px;height:56px;border-radius:10px;background:#f2f4f7;border:1px solid var(--line);overflow:hidden;display:grid;place-items:center;font-size:18px;color:var(--muted)}
@@ -50,24 +48,19 @@
     .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
     .stat{font-size:.82rem;color:var(--muted)}
     .visually-hidden{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important}
-
-    /* ---------- Buttons & inputs ---------- */
     .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:600}
+    .btn[disabled]{opacity:.6;cursor:not-allowed}
     .btn:hover{box-shadow:var(--shadow)}
     .primary{background:var(--acc);color:#fff;border-color:transparent}
     .primary:hover{background:var(--acc-2)}
     .danger{background:var(--bad);color:#fff;border-color:transparent}
     .btn-sm{padding:8px 12px;font-size:.92rem}
-    .input, .textarea{width:100%;padding:12px 14px;border:1px solid var(--line-2);border-radius:10px;background:#fff}
+    .input,.textarea{width:100%;padding:12px 14px;border:1px solid var(--line-2);border-radius:10px;background:#fff}
     .textarea:focus,.input:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
     label{font-weight:600;display:block;margin:10px 0 6px}
-
-    /* ---------- Steps ---------- */
     .steps{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px}
     .step{color:var(--subtle)}
     .step.active{color:var(--acc)} .step.done{color:var(--ok)}
-
-    /* ---------- Tabs & result card ---------- */
     .tabs{display:flex;gap:8px;border-bottom:1px solid var(--line);margin-bottom:12px}
     .tab{padding:10px 14px;background:none;border:none;border-bottom:2px solid transparent;font-weight:700;color:var(--muted);cursor:pointer}
     .tab.active{border-bottom-color:var(--acc);color:var(--acc)}
@@ -75,8 +68,6 @@
     .result-h{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line);background:#f8fafc}
     .badge{padding:4px 10px;border-radius:999px;font-size:.75rem;font-weight:700;letter-spacing:.04em}
     .ok{background:#dcfce7;color:#14532d} .warn{background:#fff7ed;color:#9a3412} .proc{background:#eff6ff;color:#1d4ed8}
-
-    /* ---------- Summary layout ---------- */
     .risk{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
     .ring{position:relative;width:120px;height:120px}
     .ring .val{position:absolute;inset:0;display:grid;place-items:center;font-size:1.5rem;font-weight:800}
@@ -84,28 +75,23 @@
     .metric{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:10px 0}
     .metric:last-child{border-bottom:none}
     .metric .v{font-weight:800;color:var(--acc)}
-
     .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
     .chip{border:1px solid var(--line);background:var(--chip);border-radius:999px;padding:6px 10px;font-size:.86rem}
     .compact{display:grid;gap:10px}
-
-    /* ---------- Spectrum bars ---------- */
     .srow{display:flex;gap:10px;align-items:center;margin:8px 0}
     .srow .lbl{width:210px;min-width:150px;font-weight:700}
     .meter{position:relative;flex:1;height:12px;background:#eef2f7;border:1px solid var(--line);border-radius:999px;overflow:hidden}
     .fill{position:absolute;left:0;top:0;bottom:0;background:#3b82f633}
     .caret{position:absolute;top:-4px;width:2px;height:20px;background:#1d4ed8}
     .scale{display:flex;justify-content:space-between;font-size:.78rem;color:var(--subtle);margin-top:4px}
-
-    /* ---------- Raw JSON ---------- */
     pre{white-space:pre-wrap;background:#f3f6fb;border:1px solid var(--line);border-radius:12px;padding:12px;font-family:var(--mono);font-size:.86rem}
-
     .row{display:grid;gap:16px;grid-template-columns:1fr 1fr}
     @media (max-width:820px){ .row{grid-template-columns:1fr} .srow .lbl{width:150px} .btn{width:100%;justify-content:center}}
   </style>
 </head>
 <body>
-  <!-- ===================== Header ===================== -->
+  <div class="toast" id="toast" aria-live="polite" aria-atomic="true"></div>
+
   <header class="header">
     <div class="container header-content">
       <div class="brand">
@@ -124,21 +110,19 @@
   </header>
 
   <main class="container" id="app">
-    <!-- ===================== Uploader (signed URLs only) ===================== -->
+    <!-- Upload -->
     <section class="card" aria-labelledby="upl-title">
       <div class="card-h">
         <h2 id="upl-title">Analyze Conversation Screenshots</h2>
         <p class="text-sm">Upload up to <strong>3</strong> images (JPG/PNG). Free plan: <strong>one</strong> report per session.</p>
       </div>
       <div class="card-b">
-        <!-- Dropzone + file input (label triggers file picker reliably) -->
+        <!-- Label triggers picker reliably -->
         <label id="dropzone" class="drop" tabindex="0" role="button" for="fileInput"
                aria-label="Upload screenshots (drop or click)">
           <div class="icon">📱</div>
           <div><strong>Drop screenshots</strong> here or click to browse</div>
-          <div class="text-xs" style="margin-top:6px">
-            We generate short-lived, v4 signed URLs and upload directly to secure storage.
-          </div>
+          <div class="text-xs" style="margin-top:6px">We use short-lived, v4 signed URLs and upload directly to secure storage.</div>
         </label>
         <input id="fileInput" type="file" accept="image/*" multiple class="visually-hidden" aria-hidden="true">
 
@@ -155,7 +139,7 @@
             <label for="plan">Plan</label>
             <input id="plan" class="input" value="free" aria-readonly="true" readonly>
             <div class="text-xs" style="margin-top:6px">
-              <!-- TODO: Replace with a real upsell when Stripe is wired -->
+              <!-- TODO: Stripe Pro CTA -->
               Want unlimited reports? <a href="#" aria-disabled="true" title="Coming soon">Pro (coming soon)</a>
             </div>
           </div>
@@ -170,17 +154,18 @@
         </div>
       </div>
       <div class="card-f">
-        <button id="generateBtn" class="btn primary" type="button" aria-label="Generate analysis report">Generate Analysis Report</button>
+        <button id="generateBtn" class="btn primary" type="button" aria-label="Generate analysis report">
+          <span class="btn-label">Generate Analysis Report</span>
+        </button>
         <div class="text-sm">
-          <!-- TODO: Link real Terms & Privacy -->
+          <!-- TODO: Terms/Privacy links -->
           By continuing you agree to our <a href="#" aria-disabled="true">Terms</a> & <a href="#" aria-disabled="true">Privacy</a>.
-          <!-- TODO: Show a nicer inline rate-limit toast -->
           <span class="text-xs" id="limitNote" style="margin-left:8px;color:var(--subtle)"></span>
         </div>
       </div>
     </section>
 
-    <!-- ===================== Results ===================== -->
+    <!-- Results -->
     <section class="card" aria-labelledby="res-title">
       <div class="card-h" style="display:flex;align-items:center;justify-content:space-between">
         <h2 id="res-title">Analysis Results</h2>
@@ -192,10 +177,10 @@
         <div id="empty" class="text-sm" style="text-align:center;padding:46px 0;color:var(--subtle)">No analyses yet. Upload screenshots above to get started.</div>
       </div>
 
-      <!-- Optional tiny dev samples -->
+      <!-- Optional dev samples -->
       <div class="card-f">
         <details>
-          <summary class="text-sm">Dev Samples (JSON) — for manual testing in the <em>Raw Data</em> tab</summary>
+          <summary class="text-sm">Dev Samples (JSON) — paste into Raw tab while testing</summary>
           <pre class="text-xs" style="margin-top:8px">{ "analysis":{ "risk_score":18, "confidence":0.88 }, "kpis":{ "communication_balance":72, "emotional_stability":81 }, "tactics":[{"id":"minimization","likelihood":0.2}], "receipts":{"highlights":[{"quote":"Calm down, it was nothing.","tactic":"minimization"}]} }</pre>
           <pre class="text-xs">{ "risk_score":52, "confidence":"76%", "kpis":{ "communication_balance":55, "emotional_stability":47 }, "tactics":[{"name":"gaslighting","score":64,"examples":["You always misremember.","That's not how it happened."]},{"name":"blame-shifting","likelihood":0.55}], "receipts":[{"quote":"You're imagining it."},{"quote":"If you hadn't started it…","category":"blame-shifting"}] }</pre>
           <pre class="text-xs">{ "analysis":{ "risk_score":91, "confidence":0.93, "kpis":{ "communication_balance":22, "emotional_stability":18 } }, "tactics":[{"id":"darvo","likelihood":0.92,"examples":["Stop attacking me, I'm the victim."]},{"id":"threats","likelihood":0.88,"examples":["You'll regret this."]},{"id":"contempt","score":85}], "receipts":{"highlights":[{"quote":"You're the abusive one here.","tactic":"darvo"},{"quote":"Keep it up and see what happens.","tactic":"threats"}]} }</pre>
@@ -204,7 +189,7 @@
     </section>
   </main>
 
-  <!-- ===================== Result Template ===================== -->
+  <!-- Result Template -->
   <template id="resultTpl">
     <div class="result" role="region" aria-label="Analysis report">
       <div class="result-h">
@@ -266,39 +251,30 @@
 
   <script>
     /* ==========================================================================================
-       Toxella Frontend (single-file, vanilla JS) — Cloud Run API hardcoded, signed URLs only.
-       Endpoints used:
+       Toxella Frontend (single-file, vanilla JS). Signed URLs only. API base is hardcoded.
+       Cloud Run base: https://toxella-api-yhopcbvaia-uc.a.run.app
+
+       BACKEND CONTRACT (do not remove, used by ops)
+       Endpoints:
          POST  /signed-urls  { plan, count } -> { jobId, urls:[{uploadUrl, path, contentType?}] }
-         PUT   signed url(s) with file body
+         PUT   <signed-url>  (file body)
          POST  /jobs         { jobId, plan, files:[{path,size,mime}], instructions? }
          GET   /jobs/{id}    -> { status, reportId? }
-         GET   /reports/{id} -> final JSON (see mapping below)
+         GET   /reports/{id} -> final JSON
 
-       FIELD MAPPING — ADJUST HERE IF YOUR WORKER DIFFERS
-       ------------------------------------------------------------------------------------------
-       We defensively read values from multiple possible locations:
-
-         risk score:   rep.risk_score OR rep.analysis.risk_score OR rep.score
-         confidence:   rep.confidence OR rep.analysis.confidence
-         KPIs:
-           communication_balance: rep.kpis.communication_balance
-                                   OR rep.analysis.kpis.communication_balance
-                                   OR rep.analysis.communication_balance
-           emotional_stability:   rep.kpis.emotional_stability
-                                   OR rep.analysis.kpis.emotional_stability
-                                   OR rep.analysis.emotional_stability
-         tactics array: rep.tactics (each item may have: {id|name, score|likelihood, examples?})
-         receipts:      rep.receipts.highlights[] OR rep.receipts[] (each: {quote, tactic|category})
-
-       If your worker changes these keys, edit the accessor lines in:
-         - renderReportSummary()     (risk/label, confidence, KPIs, receipts count, chips, top3)
-         - buildPremiumReport(rep)   (the detailed narrative & spectrum)
-       Look for comments:  // <— FIELD MAPPING
+       FIELD MAPPING — If your worker payload changes, edit the accessors in:
+         renderReportSummary() and buildPremiumReport()
+         We read defensively from these keys:
+           risk score: rep.risk_score OR rep.analysis.risk_score OR rep.score
+           confidence: rep.confidence OR rep.analysis.confidence
+           kpis.communication_balance: rep.kpis.communication_balance OR rep.analysis.kpis.communication_balance OR rep.analysis.communication_balance
+           kpis.emotional_stability:   rep.kpis.emotional_stability   OR rep.analysis.kpis.emotional_stability   OR rep.analysis.emotional_stability
+           tactics: rep.tactics[] (item: {id|name, score|likelihood, examples?})
+           receipts: rep.receipts.highlights[] OR rep.receipts[] (item: {quote, tactic|category})
        ========================================================================================== */
 
     /* ---------- Config ---------- */
-    const DEFAULT_API = "https://toxella-api-yhopcbvaia-uc.a.run.app"; // hardcoded live API base
-    const API_BASE = DEFAULT_API;
+    const API_BASE = "https://toxella-api-yhopcbvaia-uc.a.run.app"; // REQUIRED live base (Cloud Run)
     const FREE_MAX_JOBS = 1;
     const MAX_FILES = 3;
     const MIN_FILES = 1;
@@ -315,6 +291,7 @@
     const $empty = document.getElementById('empty');
     const $clear = document.getElementById('clearBtn');
     const $limit = document.getElementById('limitNote');
+    const $toast = document.getElementById('toast');
     const resultTpl = document.getElementById('resultTpl');
 
     const $stSelect = document.getElementById('st-select');
@@ -325,20 +302,42 @@
     $api.textContent = API_BASE;
 
     /* ---------- State ---------- */
-    let files = [];        // [{file, id, previewUrl, status: 'Selected'|'Uploading…'|'Uploaded ✓'}]
+    let files = [];        // [{file, id, previewUrl, status}]
     let jobs = [];         // [{id, el}]
     let jobsCount = 0;
 
-    /* ---------- Dropzone interactions ---------- */
-    // Using a <label for="fileInput"> ensures reliable picker open. No programmatic .click() needed for mouse.
-    ['dragenter','dragover'].forEach(ev => $dz.addEventListener(ev, e => {
-      e.preventDefault(); e.stopPropagation(); $dz.classList.add('drag');
-    }));
-    ['dragleave','drop'].forEach(ev => $dz.addEventListener(ev, e => {
-      e.preventDefault(); e.stopPropagation(); $dz.classList.remove('drag');
-    }));
+    /* ---------- UX helpers ---------- */
+    function toast(msg, type='ok', ms=3500){
+      const el = document.createElement('div');
+      el.className = `t ${type}`;
+      el.textContent = msg;
+      $toast.appendChild(el);
+      setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateY(6px)'; }, ms-300);
+      setTimeout(()=>{ el.remove(); }, ms);
+    }
+    function setStatus(s){ $status.textContent = s; }
+    function busy(btn, on){
+      btn.toggleAttribute('disabled', !!on);
+      const label = btn.querySelector('.btn-label');
+      if (label) label.textContent = on ? 'Working…' : 'Generate Analysis Report';
+    }
+    function markSteps(phase){
+      [$stSelect,$stUpload,$stAnalyze,$stReport].forEach(el => el.className='step');
+      if (phase==='select'){ $stSelect.classList.add('active'); }
+      if (phase==='upload'){ $stSelect.classList.add('done'); $stUpload.classList.add('active'); }
+      if (phase==='analyze'){ $stSelect.classList.add('done'); $stUpload.classList.add('done'); $stAnalyze.classList.add('active'); }
+      if (phase==='report'){ $stSelect.classList.add('done'); $stUpload.classList.add('done'); $stAnalyze.classList.add('done'); $stReport.classList.add('active'); }
+    }
+    function human(n){ const u=['B','KB','MB','GB']; let i=0,x=n; while(x>=1024&&i<u.length-1){x/=1024;i++;} return `${x.toFixed(x>=10||i===0?0:1)} ${u[i]}`; }
+    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]); }
+    function toInt(x){ if (typeof x==='number') return Math.round(x<=1?x*100:x); if (typeof x==='string' && /^\d+(\.\d+)?$/.test(x)) return Math.round(parseFloat(x)<=1?parseFloat(x)*100:parseFloat(x)); return 0; }
+    function toPct(x){ if (typeof x==='number') return `${Math.round(x<=1?x*100:x)}%`; if (typeof x==='string' && /^\d+%$/.test(x)) return x; if (typeof x==='string' && /^\d+(\.\d+)?$/.test(x)) return `${Math.round(parseFloat(x)<=1?parseFloat(x)*100:parseFloat(x))}%`; return '—'; }
+    function firstNumber(...vals){ for (const v of vals){ if (typeof v==='number' && !isNaN(v)) return v; } return null; }
+
+    /* ---------- File handling ---------- */
+    ['dragenter','dragover'].forEach(ev => $dz.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); $dz.classList.add('drag'); }));
+    ['dragleave','drop'].forEach(ev => $dz.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); $dz.classList.remove('drag'); }));
     $dz.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
-    // Keyboard accessibility: Enter/Space on the label also opens the picker on most browsers.
     $dz.addEventListener('keydown', e => { if (e.key==='Enter' || e.key===' ') $fileInput.click(); });
     $fileInput.addEventListener('change', e => handleFiles(e.target.files));
 
@@ -355,6 +354,7 @@
       renderGallery();
       $limit.textContent = jobsCount >= FREE_MAX_JOBS ? 'Free limit reached: clear results to run again.' : '';
       setStatus(`${files.length} file(s) selected`);
+      toast(`${files.length} file(s) selected`, 'ok', 2000);
     }
 
     function renderGallery(){
@@ -384,76 +384,91 @@
       }
     }
 
-    /* ---------- Steps UI ---------- */
-    function markSteps(phase){
-      [$stSelect,$stUpload,$stAnalyze,$stReport].forEach(el => el.className='step');
-      if (phase==='select'){ $stSelect.classList.add('active'); }
-      if (phase==='upload'){ $stSelect.classList.add('done'); $stUpload.classList.add('active'); }
-      if (phase==='analyze'){ $stSelect.classList.add('done'); $stUpload.classList.add('done'); $stAnalyze.classList.add('active'); }
-      if (phase==='report'){ $stSelect.classList.add('done'); $stUpload.classList.add('done'); $stAnalyze.classList.add('done'); $stReport.classList.add('active'); }
-    }
-
-    /* ---------- Generate Flow ---------- */
+    /* ---------- Main flow ---------- */
     $generate.addEventListener('click', startGenerate);
+    $clear.addEventListener('click', ()=>{
+      $results.innerHTML = '';
+      $results.appendChild($empty);
+      $empty.style.display='block';
+      jobs = []; jobsCount = 0;
+      setStatus('Cleared. You can run another report.');
+      $limit.textContent = '';
+      markSteps('select');
+    });
 
     async function startGenerate(){
       try{
         if (jobsCount >= FREE_MAX_JOBS){
-          // TODO: show nicer toast / inline CTA
-          setStatus('Free plan limit reached this session. Clear results to run again.');
-          $limit.textContent = 'Free limit reached: clear results to run again.';
+          toast('Free plan limit reached. Clear results to run again.', 'warn');
+          setStatus('Free plan limit reached this session.');
           return;
         }
-        if (files.length < MIN_FILES) return setStatus(`Please select ${MIN_FILES}–${MAX_FILES} screenshots.`);
-        if (files.length > MAX_FILES) return setStatus(`Maximum ${MAX_FILES} files allowed.`);
+        if (files.length < MIN_FILES) { toast(`Select ${MIN_FILES}–${MAX_FILES} screenshots first.`, 'warn'); return; }
+        if (files.length > MAX_FILES) { toast(`Maximum ${MAX_FILES} files allowed.`, 'warn'); return; }
 
+        busy($generate, true);
         markSteps('upload');
         setStatus('Requesting signed URLs…');
 
-        const r = await fetch(`${API_BASE}/signed-urls`, {
-          method:'POST', headers:{'Content-Type':'application/json'},
+        const signed = await safeJson(fetch(`${API_BASE}/signed-urls`, {
+          method:'POST', mode:'cors', credentials:'omit',
+          headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ plan:'free', count: files.length })
-        });
-        const j = await r.json();
-        if (!r.ok) throw new Error(j.error || 'Failed to get signed URLs');
-
-        const { jobId, urls=[] } = j || {};
+        }));
+        if (!signed.ok) throw new Error(signed.err || 'Failed to get signed URLs');
+        const { jobId, urls=[] } = signed.data || {};
         if (!jobId || urls.length < files.length) throw new Error('Server did not provide enough upload slots');
 
-        // Upload each file
+        // Upload files
         for (let i=0;i<files.length;i++){
           updateFileStatus(i, 'Uploading…');
           const f = files[i].file;
           const u = urls[i];
           const ct = u.contentType || f.type || 'application/octet-stream';
-          const put = await fetch(u.uploadUrl, { method:'PUT', headers:{'Content-Type':ct}, body:f });
-          if (!put.ok) throw new Error(`Upload failed for ${f.name} (${put.status})`);
+          const putRes = await fetch(u.uploadUrl, { method:'PUT', headers:{'Content-Type':ct}, body:f });
+          if (!putRes.ok) throw new Error(`Upload failed for ${f.name} (${putRes.status})`);
           updateFileStatus(i, 'Uploaded ✓');
         }
+        toast('All files uploaded ✓', 'ok', 1800);
 
         // Create job
         markSteps('analyze');
         setStatus('Creating analysis job…');
         const metas = urls.map((u,i)=>({ path:u.path, size: files[i].file.size, mime: files[i].file.type || 'application/octet-stream' }));
         const instructions = ($context.value||'').trim();
-        const cr = await fetch(`${API_BASE}/jobs`, {
-          method:'POST', headers:{'Content-Type':'application/json'},
+
+        const jobRes = await safeJson(fetch(`${API_BASE}/jobs`, {
+          method:'POST', mode:'cors', credentials:'omit',
+          headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ jobId, plan:'free', files: metas, ...(instructions?{instructions}:{}) })
-        });
-        const cj = await cr.json();
-        if (!cr.ok) throw new Error(cj.error || 'Job creation failed');
+        }));
+        if (!jobRes.ok) throw new Error(jobRes.err || 'Job creation failed');
 
         setStatus('Analysis in progress…');
-        markSteps('analyze');
         addResultCard(jobId);
         jobsCount++;
+        toast('Job created. Fetching results…', 'ok', 1800);
       }catch(e){
         console.error(e);
+        toast(e.message || 'Something went wrong', 'err', 4500);
         setStatus(e.message || 'Something went wrong');
+      }finally{
+        busy($generate, false);
       }
     }
 
-    /* ---------- Results ---------- */
+    async function safeJson(promise){
+      try{
+        const r = await promise;
+        const ct = (r.headers.get('content-type')||'').toLowerCase();
+        let data = null;
+        if (ct.includes('application/json')) data = await r.json();
+        else data = { error: `Unexpected content-type: ${ct||'none'}` };
+        return { ok: r.ok, data, err: (!r.ok && (data && (data.error||data.message))) || (!r.ok && `${r.status} ${r.statusText}`) || null };
+      }catch(err){ return { ok:false, data:null, err: err.message || 'Network error' }; }
+    }
+
+    /* ---------- Results rendering & polling ---------- */
     function addResultCard(jobId){
       if ($empty) $empty.style.display='none';
       const frag = resultTpl.content.cloneNode(true);
@@ -474,30 +489,36 @@
       });
 
       $results.prepend(el);
+      poll();
 
       async function poll(){
         try{
-          const jr = await fetch(`${API_BASE}/jobs/${encodeURIComponent(jobId)}`, { cache:'no-store' });
-          const j = await jr.json();
-          const st = (j.status||'').toUpperCase() || 'PENDING';
+          const job = await safeJson(fetch(`${API_BASE}/jobs/${encodeURIComponent(jobId)}`, { cache:'no-store', mode:'cors', credentials:'omit' }));
+          if (!job.ok) throw new Error(job.err || 'Job status failed');
+          const j = job.data || {};
+          const st = ((j.status||'').toUpperCase()) || 'PENDING';
           $statusEl.textContent = st;
           $statusEl.className = 'badge ' + (st.includes('COMPLETE') ? 'ok' : st.includes('ERROR') ? 'warn' : 'proc');
 
           if (j.reportId){
             markSteps('report');
-            const rr = await fetch(`${API_BASE}/reports/${encodeURIComponent(j.reportId)}`, { cache:'no-store' });
-            const rep = await rr.json();
+            const repRes = await safeJson(fetch(`${API_BASE}/reports/${encodeURIComponent(j.reportId)}`, { cache:'no-store', mode:'cors', credentials:'omit' }));
+            if (!repRes.ok) throw new Error(repRes.err || 'Failed to fetch report');
+            const rep = repRes.data;
             renderReportSummary(el, rep, jobId);
             renderReportDetailed(el, rep, jobId);
             renderReportRaw(el, rep);
             setStatus('Analysis complete');
+            toast('Report ready ✓', 'ok', 2200);
             return;
           }
-          if (st.includes('ERROR')){ setStatus('Analysis failed'); return; }
-        }catch(e){ /* transient */ }
+          if (st.includes('ERROR')){ setStatus('Analysis failed'); toast('Analysis failed', 'err'); return; }
+        }catch(e){
+          // Soft error: keep polling
+          console.warn('Poll error:', e.message);
+        }
         setTimeout(poll, 2500);
       }
-      poll();
       jobs.push({id:jobId, el});
     }
 
@@ -529,7 +550,7 @@
                       : Array.isArray(rep?.receipts) ? rep.receipts : [];
       const tactics = Array.isArray(rep.tactics) ? rep.tactics : [];
 
-      // Risk ring + label
+      // Ring + label
       $ringWrap.innerHTML = ring(score);
       $riskLabel.textContent = label;
 
@@ -539,7 +560,7 @@
       $es.textContent = typeof es==='number' ? `${Math.round(es)} / 100` : '—';
       $rc.textContent = `${receipts.length}`;
 
-      // Tactic chips (show up to 6)
+      // Tactic chips
       $chips.innerHTML = tactics.slice(0,6).map(t=>{
         const name=(t.name||t.id||'').toString();
         const rawScore = (typeof t.score==='number'?t.score:(typeof t.likelihood==='number'?t.likelihood:null));
@@ -547,7 +568,7 @@
         return `<span class="chip">${escapeHtml(prettyTactic(name))}${val!==''?` • ${val}`:''}</span>`;
       }).join('') || `<span class="text-sm">No tactics extracted</span>`;
 
-      // Top 3 tactics with 1–2 quotes each (compact)
+      // Top 3 (with quotes if present)
       const tScores = tacticScores(tactics);
       const grouped = receiptsByTactic(rep);
       const top = tScores.sort((a,b)=>b.score-a.score).slice(0,3).filter(t=>t.score>0);
@@ -561,7 +582,7 @@
         }).join('');
       }
 
-      // Flat receipts list (cap at 12)
+      // Receipts list
       $receipts.innerHTML = receipts.slice(0,12).map(r=>{
         const q = (r.quote || r || '').toString().slice(0,280);
         const cat = r.category || r.tactic || '';
@@ -575,32 +596,9 @@
       const $dl = el.querySelector('[data-download]');
       const html = buildPremiumReport(rep);
       $narr.innerHTML = html;
-      $copy.onclick = async ()=>{ await navigator.clipboard.writeText($narr.innerText.trim()); setStatus('Report copied'); };
+      $copy.onclick = async ()=>{ try{ await navigator.clipboard.writeText($narr.innerText.trim()); toast('Report copied', 'ok'); }catch{} };
       $dl.onclick = ()=>{ const blob = new Blob([$narr.innerText],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`toxella_report_${jobId}.txt`; a.click(); URL.revokeObjectURL(a.href); };
     }
-
-    /* ---------- Clear (client-side only, keeps backend jobs intact) ---------- */
-    $clear.addEventListener('click', ()=>{
-      $results.innerHTML = '';
-      $results.appendChild($empty);
-      $empty.style.display='block';
-      jobs = []; jobsCount = 0;
-      setStatus('Cleared. You can run another report.');
-      $limit.textContent = '';
-      markSteps('select');
-    });
-
-    /* ---------- Helpers ---------- */
-    function setStatus(s){ $status.textContent = s; }
-    function human(n){
-      const u=['B','KB','MB','GB']; let i=0, x=n;
-      while(x>=1024 && i<u.length-1){ x/=1024; i++; }
-      return `${x.toFixed(x>=10||i===0?0:1)} ${u[i]}`;
-    }
-    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]); }
-    function toInt(x){ if (typeof x==='number') return Math.round(x<=1?x*100:x); if (typeof x==='string' && /^\d+$/.test(x)) return parseInt(x,10); return 0; }
-    function toPct(x){ if (typeof x==='number') return `${Math.round(x<=1?x*100:x)}%`; if (typeof x==='string' && /^\d+%$/.test(x)) return x; if (typeof x==='string' && /^\d+(\.\d+)?$/.test(x)) return `${Math.round(parseFloat(x)<=1?parseFloat(x)*100:parseFloat(x))}%`; return '—'; }
-    function firstNumber(...vals){ for (const v of vals){ if (typeof v==='number' && !isNaN(v)) return v; } return null; }
 
     function ring(score){
       const pct = Math.max(0,Math.min(100,Math.round(score||0)));
@@ -612,7 +610,7 @@
       </svg>`;
     }
 
-    /* ---------- Tactics & narrative builder ---------- */
+    /* ---------- Tactics & narrative ---------- */
     const TACTIC_ORDER = ["gaslighting","darvo","blame-shifting","minimization","stonewalling","contempt","guilt-tripping","threats","coercion","triangulation","boundaries","projection"];
     const TACTIC_NAME = {
       "gaslighting":"Gaslighting",
@@ -628,21 +626,10 @@
       "boundaries":"Boundary Misuse",
       "projection":"Projection"
     };
-    const TACTIC_DESC = {
-      "gaslighting":"Denies or distorts reality to make you doubt your perception or memory.",
-      "darvo":"Flips roles: denies harm, attacks you, and claims to be the real victim.",
-      "blame-shifting":"Redirects responsibility back onto you or others.",
-      "minimization":"Downplays the seriousness of events or feelings to avoid accountability.",
-      "stonewalling":"Refuses to engage or delays to block resolution.",
-      "contempt":"Mocks, belittles, or insults; communicates superiority or disgust.",
-      "guilt-tripping":"Uses guilt to coerce compliance when you did not do wrong.",
-      "threats":"Explicit or implied threats to punish, harm, or abandon.",
-      "coercion":"Controls choices through pressure, ultimatums, or consequences.",
-      "triangulation":"Pulls in third parties to intimidate or discredit.",
-      "boundaries":"Invokes ‘boundaries’ selectively to control access or dodge accountability.",
-      "projection":"Accuses you of the very behavior they’re doing."
-    };
-    function prettyTactic(x){ return TACTIC_NAME[normId(x)] || (String(x||'').charAt(0).toUpperCase()+String(x||'').slice(1)); }
+    function prettyTactic(x){
+      const id = normId(x);
+      return TACTIC_NAME[id] || (String(x||'').charAt(0).toUpperCase()+String(x||'').slice(1));
+    }
     function normId(x){
       const s = String(x||'').toLowerCase();
       if (s.includes('boundary')) return 'boundaries';
@@ -693,9 +680,7 @@
         </div>
       </div>`;
     }
-    function tacticScores(tactics){
-      return TACTIC_ORDER.map(id => ({ id, score: scoreFor(tactics, id) }));
-    }
+    function tacticScores(tactics){ return TACTIC_ORDER.map(id => ({ id, score: scoreFor(tactics, id) })); }
 
     function buildPremiumReport(rep){
       // <— FIELD MAPPING
@@ -715,7 +700,6 @@
         <li>Confidence: <strong>${confPct}</strong></li>
       </ul></div>`;
 
-      // Spectrum
       let spectrum = '';
       const tScores=tacticScores(rep.tactics||[]);
       for (const id of TACTIC_ORDER){ spectrum += spectrumRow(TACTIC_NAME[id], tScores.find(t=>t.id===id)?.score||0); }
@@ -723,7 +707,6 @@
         <div class="scale"><span>None</span><span>Low</span><span>Medium</span><span>High</span><span>Severe</span></div>
         <div>${spectrum}</div></div>`;
 
-      // Narrative paragraph
       const top = tScores.slice().sort((a,b)=>b.score-a.score).slice(0,3).filter(t=>t.score>0);
       html += `<div style="margin-top:10px"><h3 style="margin:0">Narrative</h3>
         <p>The conversation presents <strong>${label.toLowerCase()}</strong> manipulation risk overall (score ${score}/100).
@@ -731,7 +714,6 @@
         Language shows ${typeof cb==='number'?(cb<40?'dominance/monologue tendencies':'some balance in turn-taking'): 'variable turn-taking'} and ${typeof es==='number'?(es<40?'emotional volatility':'reasonable emotional control'):'mixed emotional tone'}.
         Consider using short, calm prompts that keep focus on one concrete topic at a time.</p></div>`;
 
-      // Grouped receipts
       const grouped = receiptsByTactic(rep);
       const any = Object.keys(grouped).some(k => (grouped[k]||[]).length);
       html += `<div style="margin-top:6px"><h3 style="margin:0">Receipts (flagged quotes, grouped)</h3>`;
@@ -745,18 +727,14 @@
       }
       html += `</div>`;
 
-      // Suggestions
       html += `<div style="margin-top:10px"><h3 style="margin:0">Suggested Responses (non-escalating)</h3>
         <ul style="margin:6px 0 0 18px">
           <li>“Calling me names doesn’t address the question. Can you answer directly?”</li>
           <li>“Let’s stay with this specific event. I’m asking about that.”</li>
           <li>“If we can’t talk respectfully right now, let’s pause and revisit later.”</li>
         </ul></div>`;
-
       return html;
     }
-
-    /* ---------- END Helpers ---------- */
   </script>
 </body>
 </html>
